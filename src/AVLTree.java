@@ -14,16 +14,19 @@ public class AVLTree {
 	 * Rebalances a node after insertion to the tree.
 	 *
 	 * @param node the node to rebalance
+	 * @return the number of rebalances that occurred
 	 */
-	private void rebalance(IAVLNode node) {
+	private int rebalance(IAVLNode node) {
+		int amount = 0;
 		IAVLNode parent = node.getParent();
 		if (parent != null) {
 			IAVLNode otherChild = parent.getLeft() == node ? parent.getRight() : parent.getLeft();
 			if (parent.getHeight() - node.getHeight() == 0) {
+				amount++;
 				if (parent.getHeight() - otherChild.getHeight() == 1) {
 					//case 1: promote
 					parent.setHeight(parent.getHeight() + 1);
-					rebalance(parent);
+					amount += rebalance(parent);
 				} else if (parent.getLeft() == node && node.getHeight() - node.getLeft().getHeight() == 1) {
 					//case 2 of left child: rotate right
 					rotateRight(node);
@@ -35,15 +38,18 @@ public class AVLTree {
 					IAVLNode rightChild = node.getRight();
 					rotateLeft(rightChild);
 					rotateRight(rightChild);
+					amount++;
 				} else {
 					//case 3 of right child: rotate right then left
 					IAVLNode leftChild = node.getLeft();
 					rotateRight(leftChild);
 					rotateLeft(leftChild);
+					amount++;
 				}
 			}
 			//otherwise, parent is not a leaf and no rebalancing is needed
 		}
+		return amount;
 	}
 
 	/**
@@ -163,7 +169,8 @@ public class AVLTree {
 				currNode.getParent().setRight(node);
 			}
 			node.setParent(currNode.getParent());
-			rebalance(node);
+			//TODO: should promotions also count as rebalances?
+			rebalances = rebalance(node);
 		}
 		return rebalances;
 	}

@@ -19,18 +19,18 @@ class AVLTreeTest {
 	@Test
 	void createTreeAVLTest() {
 		AVLTree tree = new AVLTree();
-		tree.insert(5, "a");
-		tree.insert(10, "a");
-		tree.insert(12, "a");
-		tree.insert(4, "a");
-		tree.insert(15, "a");
-		tree.insert(1, "a");
-		tree.insert(3, "a");
-		tree.insert(17, "a");
-		tree.insert(8, "a");
-		tree.insert(2, "a");
-		tree.insert(14, "a");
-		tree.insert(16, "a");
+		int rebalances = tree.insert(5, "a");
+		rebalances = tree.insert(10, "a");
+		rebalances = tree.insert(12, "a");
+		rebalances = tree.insert(4, "a");
+		rebalances = tree.insert(15, "a");
+		rebalances = tree.insert(1, "a");
+		rebalances = tree.insert(3, "a");
+		rebalances = tree.insert(17, "a");
+		rebalances = tree.insert(8, "a");
+		rebalances = tree.insert(2, "a");
+		rebalances = tree.insert(14, "a");
+		rebalances = tree.insert(16, "a");
 
 		TreePrinter.print(tree, false);
 	}
