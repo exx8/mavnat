@@ -7,16 +7,16 @@ public class TreePrinter {
 	 *
 	 * @param tree an AVL tree
 	 */
-	public static void print(AVLTree tree) {
+	public static void print(AVLTree tree, boolean printHeights) {
 		if (!tree.empty()) {
 			int treeHeight = tree.getRoot().getHeight();
 			List<AVLTree.IAVLNode> nodes = new ArrayList<>();
 			nodes.add(tree.getRoot());
 			int depth = 0;
 			int index = 0;
-			while (depth <= treeHeight) {
-				int beforeSpaces = (int) Math.pow(2, treeHeight - depth) - 1;
-				int betweenSpaces = (int) Math.pow(2, treeHeight - depth + 1) - 1;
+			while (depth <= treeHeight + 1) {
+				int beforeSpaces = (int) Math.pow(2, treeHeight - depth + 2) - 1;
+				int betweenSpaces = (int) Math.pow(2, treeHeight - depth + 3) - 1;
 				printWhitespaces(beforeSpaces);
 				int nodesAmount = (int) Math.pow(2, depth);
 				int carry = 0;
@@ -24,8 +24,9 @@ public class TreePrinter {
 					AVLTree.IAVLNode node = nodes.get(index + i);
 					carry = 0;
 					if (node != null) {
-						System.out.print(node.getKey());
-						if (node.getKey() >= 10) {
+						int printVal = printHeights ? node.getHeight() : node.getKey();
+						System.out.print(printVal);
+						if (printVal >= 10 || printVal < 0) {
 							carry = -1;
 						}
 						nodes.add(node.getLeft());
@@ -38,8 +39,8 @@ public class TreePrinter {
 					printWhitespaces(betweenSpaces + carry);
 				}
 				System.out.print("\n");
-				if (depth < treeHeight) {
-					int branchesAmount = (int) Math.pow(2, treeHeight - depth - 1);
+				if (depth <= treeHeight) {
+					int branchesAmount = (int) Math.pow(2, treeHeight - depth + 1);
 					for (int i = 0; i < branchesAmount; i++) {
 						printWhitespaces(beforeSpaces - 1 - i);
 						for (int j = 0; j < nodesAmount; j++) {

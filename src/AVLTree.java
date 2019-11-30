@@ -11,16 +11,103 @@ public class AVLTree {
 	//region private methods
 
 	/**
-	 * Updates the heights of a node's ancestors after it was inserted to the tree.
+	 * Rebalances a node after insertion to the tree.
 	 *
-	 * @param node a node that was inserted to the tree
+	 * @param node the node to rebalance
 	 */
-	private void updateHeightsToRoot(IAVLNode node) {
+	private void rebalance(IAVLNode node) {
 		IAVLNode parent = node.getParent();
-		if (parent != null && parent.getHeight() < node.getHeight() + 1) {
-			parent.setHeight(node.getHeight() + 1);
-			updateHeightsToRoot(parent);
+		if (parent != null) {
+			IAVLNode otherChild = parent.getLeft() == node ? parent.getRight() : parent.getLeft();
+			if (parent.getHeight() - node.getHeight() == 0) {
+				if (parent.getHeight() - otherChild.getHeight() == 1) {
+					//case 1: promote
+					parent.setHeight(parent.getHeight() + 1);
+					rebalance(parent);
+				} else if (parent.getLeft() == node && node.getHeight() - node.getLeft().getHeight() == 1) {
+					//case 2 of left child: rotate right
+					rotateRight(node);
+				} else if (parent.getRight() == node && node.getHeight() - node.getRight().getHeight() == 1) {
+					//case 2 of right child: rotate left
+					rotateLeft(node);
+				} else if (parent.getLeft() == node && node.getHeight() - node.getLeft().getHeight() == 2) {
+					//case 3 of left child: rotate left then right
+					IAVLNode rightChild = node.getRight();
+					rotateLeft(rightChild);
+					rotateRight(rightChild);
+				} else {
+					//case 3 of right child: rotate right then left
+					IAVLNode leftChild = node.getLeft();
+					rotateRight(leftChild);
+					rotateLeft(leftChild);
+				}
+			}
+			//otherwise, parent is not a leaf and no rebalancing is needed
 		}
+	}
+
+	/**
+	 * Perform a left rotation
+	 *
+	 * @param node the node to rotate
+	 */
+	private void rotateLeft(IAVLNode node) {
+		IAVLNode parent = node.getParent();
+		IAVLNode leftChild = node.getLeft();
+		//update children
+		if (parent == getRoot()) {
+			root = node;
+		} else {
+			IAVLNode parentParent = parent.getParent();
+			if (parentParent.getLeft() == parent) {
+				parentParent.setLeft(node);
+			} else {
+				parentParent.setRight(node);
+			}
+		}
+		node.setLeft(parent);
+		parent.setRight(leftChild);
+
+		//update parents
+		node.setParent(parent.getParent());
+		parent.setParent(node);
+		leftChild.setParent(parent);
+
+		//update heights
+		node.setHeight(parent.getHeight());
+		parent.setHeight(Math.max(parent.getLeft().getHeight(), parent.getRight().getHeight()) + 1);
+	}
+
+	/**
+	 * Perform a right rotation
+	 *
+	 * @param node the node to rotate
+	 */
+	private void rotateRight(IAVLNode node) {
+		IAVLNode parent = node.getParent();
+		IAVLNode rightChild = node.getRight();
+		//update children
+		if (parent == getRoot()) {
+			root = node;
+		} else {
+			IAVLNode parentParent = parent.getParent();
+			if (parentParent.getLeft() == parent) {
+				parentParent.setLeft(node);
+			} else {
+				parentParent.setRight(node);
+			}
+		}
+		node.setRight(parent);
+		parent.setLeft(rightChild);
+
+		//update parents
+		node.setParent(parent.getParent());
+		parent.setParent(node);
+		rightChild.setParent(parent);
+
+		//update heights
+		node.setHeight(parent.getHeight());
+		parent.setHeight(Math.max(parent.getLeft().getHeight(), parent.getRight().getHeight()) + 1);
 	}
 
 	//endregion
@@ -76,7 +163,7 @@ public class AVLTree {
 				currNode.getParent().setRight(node);
 			}
 			node.setParent(currNode.getParent());
-			updateHeightsToRoot(node);
+			rebalance(node);
 		}
 		return rebalances;
 	}
