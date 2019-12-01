@@ -275,7 +275,49 @@ public class AVLTree {
 	 * postcondition: none
 	 */
 	public int join(IAVLNode x, AVLTree t) {
-		return 0;
+		int complexity = 0;
+		boolean isLarger = getRoot().getHeight() > t.getRoot().getHeight();
+		AVLTree largerTree = isLarger ? this : t;
+		AVLTree smallerTree = isLarger ? t : this;
+		IAVLNode node = largerTree.getRoot();
+		if (x.getKey() < largerTree.getRoot().getKey()) {
+			//the key of x is smaller than the large tree's keys
+			while (node.getHeight() > smallerTree.getRoot().getHeight()) {
+				//find the first node with height<=small tree's height
+				node = node.getLeft();
+				complexity++;
+			}
+			x.setLeft(smallerTree.getRoot());
+			x.setRight(node);
+			if (node.getParent() != null) {
+				node.getParent().setLeft(x);
+			}
+		} else {
+			//the key of x is bigger than the large tree's keys
+			while (node.getHeight() > smallerTree.getRoot().getHeight()) {
+				//find the first node with height<=small tree's height
+				node = node.getRight();
+				complexity++;
+			}
+			x.setRight(smallerTree.getRoot());
+			x.setLeft(node);
+			if (node.getParent() != null) {
+				node.getParent().setRight(x);
+			}
+		}
+		x.setParent(node.getParent());
+		node.setParent(x);
+		x.setHeight(smallerTree.getRoot().getHeight() + 1);
+		if (node == largerTree.getRoot()) {
+			//if the heights of both tree are identical, x will becomre their new root
+			largerTree.root = x;
+		}
+		if (!isLarger) {
+			//if this tree's height is smaller than t's height, its root should change to be t's root
+			root = largerTree.root;
+		}
+		rebalance(node);
+		return complexity + 1;
 	}
 
 	/**
