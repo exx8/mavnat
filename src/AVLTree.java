@@ -78,18 +78,21 @@ public class AVLTree {
 		parent.setRight(leftChild);
 
 		//update parents
-		node.setParent(parent.getParent());
-		parent.setParent(node);
-		leftChild.setParent(parent);
+		updateParents(node, parent, leftChild);
 
 		//update heights
 		node.setHeight(parent.getHeight());
 		parent.setHeight(Math.max(parent.getLeft().getHeight(), parent.getRight().getHeight()) + 1);
 	}
 
+	protected void updateParents(IAVLNode node, IAVLNode parent, IAVLNode leftChild) {
+		node.setParent(parent.getParent());
+		parent.setParent(node);
+		leftChild.setParent(parent);
+	}
 
 
-		/**
+	/**
 		 * Perform a right rotation
 		 *
 		 * @param node the node to rotate
@@ -112,9 +115,7 @@ public class AVLTree {
 			parent.setLeft(rightChild);
 
 			//update parents
-			node.setParent(parent.getParent());
-			parent.setParent(node);
-			rightChild.setParent(parent);
+			updateParents(node, parent, rightChild);
 
 			//update heights
 			node.setHeight(parent.getHeight());
