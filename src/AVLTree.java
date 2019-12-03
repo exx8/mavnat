@@ -30,16 +30,16 @@ public class AVLTree {
 					amount = promoteParent(amount, parent);
 				} else if (nodeOnLeftOfParent && node.getHeight() - node.getLeft().getHeight() == 1) {
 					//case 2 of left child: rotate right
-					Rotations.rotateRight(node);
+					rotateRight(node);
 				} else if (parent.getRight() == node && node.getHeight() - node.getRight().getHeight() == 1) {
 					//case 2 of right child: rotate left
 					rotateLeft(node);
 				} else if (nodeOnLeftOfParent && node.getHeight() - node.getLeft().getHeight() == 2) {
 					//case 3 of left child: rotate left then right
-					amount = Rotations.rotateLeftNRight(node, amount);
+					amount = rotateLeftNRight(node, amount);
 				} else {
 					//case 3 of right child: rotate right then left
-					amount = Rotations.rotateRightNLeft(node, amount);
+					amount = rotateRightNLeft(node, amount);
 				}
 			}
 			//otherwise, parent is not a leaf and no rebalancing is needed
@@ -88,14 +88,13 @@ public class AVLTree {
 	}
 
 
-	protected static class Rotations
-	{
+
 		/**
 		 * Perform a right rotation
 		 *
 		 * @param node the node to rotate
 		 */
-		private static void rotateRight(IAVLNode node) {
+		private  void rotateRight(IAVLNode node) {
 			IAVLNode parent = node.getParent();
 			IAVLNode rightChild = node.getRight();
 			//update children
@@ -122,7 +121,7 @@ public class AVLTree {
 			parent.setHeight(Math.max(parent.getLeft().getHeight(), parent.getRight().getHeight()) + 1);
 		}
 
-		protected static int rotateRightNLeft(IAVLNode node, int amount) {
+		protected  int rotateRightNLeft(IAVLNode node, int amount) {
 			IAVLNode leftChild = node.getLeft();
 			rotateRight(leftChild);
 			rotateLeft(leftChild);
@@ -130,14 +129,14 @@ public class AVLTree {
 			return amount;
 		}
 
-		protected static int rotateLeftNRight(IAVLNode node, int amount) {
+		protected  int rotateLeftNRight(IAVLNode node, int amount) {
 			IAVLNode rightChild = node.getRight();
 			rotateLeft(rightChild);
 			rotateRight(rightChild);
 			amount++;
 			return amount;
 		}
-	}
+
 	//endregion
 
 	/**
