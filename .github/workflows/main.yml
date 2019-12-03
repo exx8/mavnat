@@ -14,7 +14,7 @@ jobs:
         java-version:  '1.8'
         
     - name: Run a one-line script
-      run: java -jar lib/junit-platform-console-standalone-1.6.0-M1.jar test/AVLTreeTest.java
+      run: java -jar lib/junit-platform-console-standalone-1.6.0-M1.jar --include=test/AVLTreeTest.java
     - name: Run a multi-line script
       run: |
         echo Add other actions to build,
