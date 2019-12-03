@@ -18,7 +18,6 @@ public class AVLTree {
 	 */
 	private int rebalance(IAVLNode node) {
 
-			Consumer<IAVLNode> setRooter= newRoot->this.setRoot(newRoot);
 		int amount = 0;
 		IAVLNode parent = node.getParent();
 		if (parent != null) {
@@ -31,20 +30,7 @@ public class AVLTree {
 					//case 1: promote
 					amount = promoteParent(amount, parent);
 				} else {
-					final IAVLNode root = this.getRoot();
-					if (nodeOnLeftOfParent && node.getHeight() - node.getLeft().getHeight() == 1) {
-						//case 2 of left child: rotate right
-						Rotations.rotateRight(node, root,setRooter);
-					} else if (parent.getRight() == node && node.getHeight() - node.getRight().getHeight() == 1) {
-						//case 2 of right child: rotate left
-						Rotations.rotateLeft(node, root,setRooter);
-					} else if (nodeOnLeftOfParent && node.getHeight() - node.getLeft().getHeight() == 2) {
-						//case 3 of left child: rotate left then right
-						amount = Rotations.rotateLeftNRight(node, amount, root,setRooter);
-					} else {
-						//case 3 of right child: rotate right then left
-						amount = Rotations.rotateRightNLeft(node, amount, root,setRooter);
-					}
+					amount = handleUnequalHeight(node, amount, parent, nodeOnLeftOfParent);
 				}
 			}
 			//otherwise, parent is not a leaf and no rebalancing is needed
@@ -52,6 +38,25 @@ public class AVLTree {
 		return amount;
 	}
 
+	private int handleUnequalHeight(IAVLNode node, int amount, IAVLNode parent, boolean nodeOnLeftOfParent) {
+		Consumer<IAVLNode> setRooter= newRoot->this.setRoot(newRoot);
+
+		final IAVLNode root = this.getRoot();
+		if (nodeOnLeftOfParent && node.getHeight() - node.getLeft().getHeight() == 1) {
+			//case 2 of left child: rotate right
+			Rotations.rotateRight(node, root,setRooter);
+		} else if (parent.getRight() == node && node.getHeight() - node.getRight().getHeight() == 1) {
+			//case 2 of right child: rotate left
+			Rotations.rotateLeft(node, root,setRooter);
+		} else if (nodeOnLeftOfParent && node.getHeight() - node.getLeft().getHeight() == 2) {
+			//case 3 of left child: rotate left then right
+			amount = Rotations.rotateLeftNRight(node, amount, root,setRooter);
+		} else {
+			//case 3 of right child: rotate right then left
+			amount = Rotations.rotateRightNLeft(node, amount, root,setRooter);
+		}
+		return amount;
+	}
 
 
 	protected int promoteParent(int amount, IAVLNode parent) {
