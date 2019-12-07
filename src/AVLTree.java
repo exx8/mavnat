@@ -5,8 +5,6 @@
  * distinct integer keys and info
  */
 
-import java.util.function.*;
-
 public class AVLTree {
 	private IAVLNode root;
 
@@ -20,6 +18,8 @@ public class AVLTree {
 	 */
 	private int rebalance(IAVLNode node) {
 
+			Rotations rotations=new Rotations();
+
 		int amount = 0;
 		IAVLNode parent = node.getParent();
 		if (parent != null) {
@@ -31,8 +31,18 @@ public class AVLTree {
 				if (parent.getHeight() - otherChild.getHeight() == 1) {
 					//case 1: promote
 					amount = promoteParent(amount, parent);
+				} else if (nodeOnLeftOfParent && node.getHeight() - node.getLeft().getHeight() == 1) {
+					//case 2 of left child: rotate right
+					rotations.rotateRight(node,this.getRoot());
+				} else if (parent.getRight() == node && node.getHeight() - node.getRight().getHeight() == 1) {
+					//case 2 of right child: rotate left
+					rotations.rotateLeft(node,this.getRoot());
+				} else if (nodeOnLeftOfParent && node.getHeight() - node.getLeft().getHeight() == 2) {
+					//case 3 of left child: rotate left then right
+					amount = rotations.rotateLeftNRight(node, amount,this.getRoot());
 				} else {
-					amount = handleUnequalHeight(node, amount, parent, nodeOnLeftOfParent);
+					//case 3 of right child: rotate right then left
+					amount = rotations.rotateRightNLeft(node, amount,this.getRoot());
 				}
 			}
 			//otherwise, parent is not a leaf and no rebalancing is needed
@@ -40,25 +50,6 @@ public class AVLTree {
 		return amount;
 	}
 
-	private int handleUnequalHeight(IAVLNode node, int amount, IAVLNode parent, boolean nodeOnLeftOfParent) {
-		Consumer<IAVLNode> setRooter = newRoot -> this.setRoot(newRoot);
-
-		final IAVLNode root = this.getRoot();
-		if (nodeOnLeftOfParent && node.getHeight() - node.getLeft().getHeight() == 1) {
-			//case 2 of left child: rotate right
-			Rotations.rotateRight(node, root, setRooter);
-		} else if (parent.getRight() == node && node.getHeight() - node.getRight().getHeight() == 1) {
-			//case 2 of right child: rotate left
-			Rotations.rotateLeft(node, root, setRooter);
-		} else if (nodeOnLeftOfParent && node.getHeight() - node.getLeft().getHeight() == 2) {
-			//case 3 of left child: rotate left then right
-			amount = Rotations.rotateLeftNRight(node, amount, root, setRooter);
-		} else {
-			//case 3 of right child: rotate right then left
-			amount = Rotations.rotateRightNLeft(node, amount, root, setRooter);
-		}
-		return amount;
-	}
 
 
 	protected int promoteParent(int amount, IAVLNode parent) {
@@ -68,93 +59,93 @@ public class AVLTree {
 	}
 
 
-	void setRoot(IAVLNode node) {
+
+	 void setRoot(IAVLNode node) {
 		root = node;
 	}
 
-	protected static void updateParents(IAVLNode node, IAVLNode parent, IAVLNode leftChild) {
+	protected void updateParents(IAVLNode node, IAVLNode parent, IAVLNode leftChild) {
 		node.setParent(parent.getParent());
 		parent.setParent(node);
 		leftChild.setParent(parent);
 	}
 
-	protected static class Rotations {
-		/**
-		 * Perform a left rotation
-		 *
-		 * @param node the node to rotate
-		 */
-		static private void rotateLeft(IAVLNode node, IAVLNode tRoot, Consumer<IAVLNode> setRoot) {
-			IAVLNode parent = node.getParent();
-			IAVLNode leftChild = node.getLeft();
-			//update children
-			if (parent == tRoot) {
-				setRoot.accept(node);
-			} else {
-				IAVLNode parentParent = parent.getParent();
-				if (parentParent.getLeft() == parent) {
-					parentParent.setLeft(node);
-				} else {
-					parentParent.setRight(node);
-				}
-			}
-			node.setLeft(parent);
-			parent.setRight(leftChild);
+   protected class Rotations {
+	  /**
+	   * Perform a left rotation
+	   *
+	   * @param node the node to rotate
+	   */
+	  private void rotateLeft(IAVLNode node,IAVLNode tRoot) {
+		  IAVLNode parent = node.getParent();
+		  IAVLNode leftChild = node.getLeft();
+		  //update children
+		  if (parent == tRoot) {
+			  setRoot(node);
+		  } else {
+			  IAVLNode parentParent = parent.getParent();
+			  if (parentParent.getLeft() == parent) {
+				  parentParent.setLeft(node);
+			  } else {
+				  parentParent.setRight(node);
+			  }
+		  }
+		  node.setLeft(parent);
+		  parent.setRight(leftChild);
 
-			//update parents
-			updateParents(node, parent, leftChild);
+		  //update parents
+		  updateParents(node, parent, leftChild);
 
-			//update heights
-			node.setHeight(parent.getHeight());
-			parent.setHeight(Math.max(parent.getLeft().getHeight(), parent.getRight().getHeight()) + 1);
-		}
+		  //update heights
+		  node.setHeight(parent.getHeight());
+		  parent.setHeight(Math.max(parent.getLeft().getHeight(), parent.getRight().getHeight()) + 1);
+	  }
+	 /**
+	  * Perform a right rotation
+	  *
+	  * @param node the node to rotate
+	  */
+	    void rotateRight(IAVLNode node, IAVLNode tRoot) {
+		 IAVLNode parent = node.getParent();
+		 IAVLNode rightChild = node.getRight();
+		 //update children
+		 if (parent == tRoot) {
+			 node.setRoot(node);
+		 } else {
+			 IAVLNode parentParent = parent.getParent();
+			 if (parentParent.getLeft() == parent) {
+				 parentParent.setLeft(node);
+			 } else {
+				 parentParent.setRight(node);
+			 }
+		 }
+		 node.setRight(parent);
+		 parent.setLeft(rightChild);
 
-		/**
-		 * Perform a right rotation
-		 *
-		 * @param node the node to rotate
-		 */
-		static void rotateRight(IAVLNode node, IAVLNode tRoot, Consumer<IAVLNode> setRoot) {
-			IAVLNode parent = node.getParent();
-			IAVLNode rightChild = node.getRight();
-			//update children
-			if (parent == tRoot) {
-				setRoot.accept(node);
-			} else {
-				IAVLNode parentParent = parent.getParent();
-				if (parentParent.getLeft() == parent) {
-					parentParent.setLeft(node);
-				} else {
-					parentParent.setRight(node);
-				}
-			}
-			node.setRight(parent);
-			parent.setLeft(rightChild);
+		 //update parents
+		 updateParents(node, parent, rightChild);
 
-			//update parents
-			updateParents(node, parent, rightChild);
+		 //update heights
+		 node.setHeight(parent.getHeight());
+		 parent.setHeight(Math.max(parent.getLeft().getHeight(), parent.getRight().getHeight()) + 1);
+	 }
 
-			//update heights
-			node.setHeight(parent.getHeight());
-			parent.setHeight(Math.max(parent.getLeft().getHeight(), parent.getRight().getHeight()) + 1);
-		}
+	 protected int rotateRightNLeft(IAVLNode node, int amount, IAVLNode tRoot) {
+		 IAVLNode leftChild = node.getLeft();
+		 rotateRight(leftChild,tRoot);
+		 rotateLeft(leftChild, tRoot);
+		 amount++;
+		 return amount;
+	 }
 
-		static protected int rotateRightNLeft(IAVLNode node, int amount, IAVLNode tRoot, Consumer<IAVLNode> setRoot) {
-			IAVLNode leftChild = node.getLeft();
-			rotateRight(leftChild, tRoot, setRoot);
-			rotateLeft(leftChild, tRoot, setRoot);
-			amount++;
-			return amount;
-		}
-
-		static protected int rotateLeftNRight(IAVLNode node, int amount, IAVLNode tRoot, Consumer<IAVLNode> setRoot) {
-			IAVLNode rightChild = node.getRight();
-			rotateLeft(rightChild, tRoot, setRoot);
-			rotateRight(rightChild, tRoot, setRoot);
-			amount++;
-			return amount;
-		}
-	}
+	 protected int rotateLeftNRight(IAVLNode node, int amount, IAVLNode tRoot) {
+		 IAVLNode rightChild = node.getRight();
+		 rotateLeft(rightChild, tRoot);
+		 rotateRight(rightChild,tRoot);
+		 amount++;
+		 return amount;
+	 }
+ }
 	//endregion
 
 	/**
