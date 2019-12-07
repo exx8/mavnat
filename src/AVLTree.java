@@ -216,13 +216,52 @@ public class AVLTree {
 	 */
 	public int delete(int k) {
 
-		Optional<IAVLNode> place2Delete=findPlace(k);
+		final Optional<IAVLNode> place2Delete=findPlace(k);
 		if(!place2Delete.isPresent())
 			return -1;
+		final IAVLNode deletedRoot = place2Delete.get();
+		final IAVLNode parentOfDeletedRoot = deletedRoot.getParent();
+		final boolean isRootLeftChild=deletedRoot.getKey()< parentOfDeletedRoot.getKey();
+		final IAVLNode rightChild = deletedRoot.getRight();
+		final Optional<IAVLNode> optionalnextRoot=findMin(rightChild);
+		if(!optionalnextRoot.isPresent()) {
+			final IAVLNode deletedRootLeftChild = deletedRoot.getLeft();
+
+			if(isRootLeftChild) {
+				parentOfDeletedRoot.setLeft(deletedRootLeftChild);
+			}
+			else
+			{
+				parentOfDeletedRoot.setRight(deletedRootLeftChild);
+			}
+			deletedRootLeftChild.setParent(parentOfDeletedRoot);
+				return rebalance(parentOfDeletedRoot);
+		}
+		else
+		{
+			final IAVLNode nextRoot = optionalnextRoot.get();
+			final IAVLNode nextCurrentRootParent = nextRoot.getParent();
+			final IAVLNode nextCurrentRootLeftChild = nextRoot.getLeft();
+			nextCurrentRootParent.setLeft(nextCurrentRootLeftChild);
+
+			nextRoot.setParent(parentOfDeletedRoot);
+			nextRoot.setLeft(deletedRoot.getLeft());
+			nextRoot.setRight(deletedRoot.getRight());
+
+
+		}
+
 
 		return 42;
 	}
 
+	protected static Optional<IAVLNode> findMin(IAVLNode node) {
+		if (!node.isRealNode())
+			return Optional.empty();
+		if (!node.getLeft().isRealNode())
+			return Optional.of(node);
+		return findMin(node.getLeft());
+	}
 	protected Optional<IAVLNode> findPlace(int key) {
 		return findPlace(key,this.root);
 	}
@@ -238,7 +277,7 @@ public class AVLTree {
 			return findPlace(key, currentNode.getLeft());
 
 		else
-			return findPlace(key, currentNode.getRight())
+			return findPlace(key, currentNode.getRight());
 
 	}
 
