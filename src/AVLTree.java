@@ -216,7 +216,10 @@ public class AVLTree {
 	 */
 	public int delete(int k) {
 
-		findPlace(k);
+		Optional<IAVLNode> place2Delete=findPlace(k);
+		if(!place2Delete.isPresent())
+			return -1;
+
 		return 42;
 	}
 
