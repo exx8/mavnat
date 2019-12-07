@@ -248,11 +248,10 @@ public class AVLTree {
 			nextRoot.setLeft(deletedRoot.getLeft());
 			nextRoot.setRight(deletedRoot.getRight());
 
-
+			return rebalance(parentOfDeletedRoot);
 		}
 
 
-		return 42;
 	}
 
 	protected static Optional<IAVLNode> findMin(IAVLNode node) {
