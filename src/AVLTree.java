@@ -221,8 +221,8 @@ public class AVLTree {
 			return -1;
 		final IAVLNode deletedRoot = place2Delete.get();
 		final IAVLNode parentOfDeletedRoot = deletedRoot.getParent();
-		final boolean isRoot=parentOfDeletedRoot==null;
-		final boolean isRootLeftChild = !isRoot&&(deletedRoot.getKey() < parentOfDeletedRoot.getKey());
+		final boolean isRoot = parentOfDeletedRoot == null;
+		final boolean isRootLeftChild = !isRoot && (deletedRoot.getKey() < parentOfDeletedRoot.getKey());
 		final IAVLNode rightChild = deletedRoot.getRight();
 		final Optional<IAVLNode> optionalnextRoot = findMin(rightChild);
 		if (!optionalnextRoot.isPresent()) {
