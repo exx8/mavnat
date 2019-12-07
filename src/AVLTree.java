@@ -216,29 +216,25 @@ public class AVLTree {
 	 */
 	public int delete(int k) {
 
-		final Optional<IAVLNode> place2Delete=findPlace(k);
-		if(!place2Delete.isPresent())
+		final Optional<IAVLNode> place2Delete = findPlace(k);
+		if (!place2Delete.isPresent())
 			return -1;
 		final IAVLNode deletedRoot = place2Delete.get();
 		final IAVLNode parentOfDeletedRoot = deletedRoot.getParent();
-		final boolean isRootLeftChild=deletedRoot.getKey()< parentOfDeletedRoot.getKey();
+		final boolean isRootLeftChild = deletedRoot.getKey() < parentOfDeletedRoot.getKey();
 		final IAVLNode rightChild = deletedRoot.getRight();
-		final Optional<IAVLNode> optionalnextRoot=findMin(rightChild);
-		if(!optionalnextRoot.isPresent()) {
+		final Optional<IAVLNode> optionalnextRoot = findMin(rightChild);
+		if (!optionalnextRoot.isPresent()) {
 			final IAVLNode deletedRootLeftChild = deletedRoot.getLeft();
 
-			if(isRootLeftChild) {
+			if (isRootLeftChild) {
 				parentOfDeletedRoot.setLeft(deletedRootLeftChild);
-			}
-			else
-			{
+			} else {
 				parentOfDeletedRoot.setRight(deletedRootLeftChild);
 			}
 			deletedRootLeftChild.setParent(parentOfDeletedRoot);
-				return rebalance(parentOfDeletedRoot);
-		}
-		else
-		{
+			return rebalance(parentOfDeletedRoot);
+		} else {
 			final IAVLNode nextRoot = optionalnextRoot.get();
 			final IAVLNode nextCurrentRootParent = nextRoot.getParent();
 			final IAVLNode nextCurrentRootLeftChild = nextRoot.getLeft();
@@ -261,8 +257,9 @@ public class AVLTree {
 			return Optional.of(node);
 		return findMin(node.getLeft());
 	}
+
 	protected Optional<IAVLNode> findPlace(int key) {
-		return findPlace(key,this.root);
+		return findPlace(key, this.root);
 	}
 
 	protected static Optional<IAVLNode> findPlace(int key, IAVLNode currentNode) {
