@@ -216,39 +216,58 @@ public class AVLTree {
 	 */
 	public int delete(int k) {
 
+		//no min get -1
 		final Optional<IAVLNode> place2Delete = findPlace(k);
 		if (!place2Delete.isPresent())
 			return -1;
+
+		//some inits
 		final IAVLNode deletedRoot = place2Delete.get();
 		final IAVLNode parentOfDeletedRoot = deletedRoot.getParent();
 		final boolean isRoot = parentOfDeletedRoot == null;
 		final boolean isRootLeftChild = !isRoot && (deletedRoot.getKey() < parentOfDeletedRoot.getKey());
 		final IAVLNode rightChild = deletedRoot.getRight();
 		final Optional<IAVLNode> optionalnextRoot = findMin(rightChild);
+
+		//real logic
 		if (!optionalnextRoot.isPresent()) {
-			final IAVLNode deletedRootLeftChild = deletedRoot.getLeft();
-
-			if (isRootLeftChild) {
-				parentOfDeletedRoot.setLeft(deletedRootLeftChild);
-			} else {
-				parentOfDeletedRoot.setRight(deletedRootLeftChild);
-			}
-			deletedRootLeftChild.setParent(parentOfDeletedRoot);
-			return rebalance(parentOfDeletedRoot);
+			return handleDeleteWithNoSuccesor(deletedRoot, parentOfDeletedRoot, isRootLeftChild);
 		} else {
-			final IAVLNode nextRoot = optionalnextRoot.get();
-			final IAVLNode nextCurrentRootParent = nextRoot.getParent();
-			final IAVLNode nextCurrentRootLeftChild = nextRoot.getLeft();
-			nextCurrentRootParent.setLeft(nextCurrentRootLeftChild);
-
-			nextRoot.setParent(parentOfDeletedRoot);
-			nextRoot.setLeft(deletedRoot.getLeft());
-			nextRoot.setRight(deletedRoot.getRight());
-
-			return rebalance(nextRoot);
+			return DeleteAndPlaceSuccesor(deletedRoot, parentOfDeletedRoot, optionalnextRoot);
 		}
 
 
+	}
+
+	protected int DeleteAndPlaceSuccesor(IAVLNode deletedRoot, IAVLNode parentOfDeletedRoot, Optional<IAVLNode> optionalnextRoot) {
+		final IAVLNode nextRoot = optionalnextRoot.get();
+		final IAVLNode nextCurrentRootParent = nextRoot.getParent();
+		final IAVLNode nextCurrentRootLeftChild = nextRoot.getLeft();
+
+		//new son to the parent
+		nextCurrentRootParent.setLeft(nextCurrentRootLeftChild);
+
+		updateNextRootProps(deletedRoot, parentOfDeletedRoot, nextRoot);
+
+		return rebalance(nextRoot);
+	}
+
+	private void updateNextRootProps(IAVLNode deletedRoot, IAVLNode parentOfDeletedRoot, IAVLNode nextRoot) {
+		nextRoot.setParent(parentOfDeletedRoot);
+		nextRoot.setLeft(deletedRoot.getLeft());
+		nextRoot.setRight(deletedRoot.getRight());
+	}
+
+	protected int handleDeleteWithNoSuccesor(IAVLNode deletedRoot, IAVLNode parentOfDeletedRoot, boolean isRootLeftChild) {
+		final IAVLNode deletedRootLeftChild = deletedRoot.getLeft();
+
+		if (isRootLeftChild) {
+			parentOfDeletedRoot.setLeft(deletedRootLeftChild);
+		} else {
+			parentOfDeletedRoot.setRight(deletedRootLeftChild);
+		}
+		deletedRootLeftChild.setParent(parentOfDeletedRoot);
+		return rebalance(parentOfDeletedRoot);
 	}
 
 	protected static Optional<IAVLNode> findMin(IAVLNode node) {
