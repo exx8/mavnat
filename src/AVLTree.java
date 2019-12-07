@@ -110,7 +110,7 @@ public class AVLTree {
 		 IAVLNode rightChild = node.getRight();
 		 //update children
 		 if (parent == tRoot) {
-			 node.setRoot(node);
+			 setRoot(node);
 		 } else {
 			 IAVLNode parentParent = parent.getParent();
 			 if (parentParent.getLeft() == parent) {
