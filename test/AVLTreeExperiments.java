@@ -2,10 +2,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class AVLTreeTest {
+class AVLTreeExperiments {
 
 	@Test
-	void createTreeTest() {
+	void createTreeExp() {
 		AVLTree tree = new AVLTree();
 		tree.insert(15, "a");
 		tree.insert(11, "a");
@@ -17,7 +17,7 @@ class AVLTreeTest {
 	}
 
 	@Test
-	void createTreeAVLTest() {
+	void createTreeAVLExp() {
 		AVLTree tree = new AVLTree();
 		int rebalances = tree.insert(5, "a");
 		rebalances = tree.insert(10, "a");
