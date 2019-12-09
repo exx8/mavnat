@@ -344,7 +344,7 @@ public class AVLTree {
 		 *
 		 * @param node the node to rotate
 		 */
-		private void rotateLeft(IAVLNode node) {
+		public void rotateLeft(IAVLNode node) {
 			IAVLNode parent = node.getParent();
 			IAVLNode leftChild = node.getLeft();
 			//update children
@@ -376,7 +376,7 @@ public class AVLTree {
 		 *
 		 * @param node the node to rotate
 		 */
-		private void rotateRight(IAVLNode node) {
+		public void rotateRight(IAVLNode node) {
 			IAVLNode parent = node.getParent();
 			IAVLNode rightChild = node.getRight();
 			//update children
