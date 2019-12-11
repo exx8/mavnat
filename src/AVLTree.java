@@ -23,29 +23,33 @@ public class AVLTree {
 		if (parent != null) {
 			IAVLNode otherChild = parent.getLeft() == node ? parent.getRight() : parent.getLeft();
 			if (parent.getHeight() - node.getHeight() == 0) {
-				amount++;
 				if (parent.getHeight() - otherChild.getHeight() == 1) {
 					//case 1: promote
-					parent.setHeight(parent.getHeight() + 1);
+					amount += parent.promote();
 					amount += rebalance(parent);
 				} else if (parent.getLeft() == node && node.getHeight() - node.getLeft().getHeight() == 1) {
 					//case 2 of left child: rotate right
-					rotations.rotateRight(node);
+					amount += rotations.rotateRight(node);
+					amount += node.getRight().demote();
 				} else if (parent.getRight() == node && node.getHeight() - node.getRight().getHeight() == 1) {
 					//case 2 of right child: rotate left
-					rotations.rotateLeft(node);
-				} else if (parent.getLeft() == node && node.getHeight() - node.getLeft().getHeight() == 2) {
-					//case 3 of left child: rotate left then right
-					IAVLNode rightChild = node.getRight();
-					rotations.rotateLeft(rightChild);
-					rotations.rotateRight(rightChild);
-					amount++;
+					amount += rotations.rotateLeft(node);
+					amount += node.getLeft().demote();
 				} else {
-					//case 3 of right child: rotate right then left
-					IAVLNode leftChild = node.getLeft();
-					rotations.rotateRight(leftChild);
-					rotations.rotateLeft(leftChild);
-					amount++;
+					//case 3
+					IAVLNode rotatedChild;
+					if (parent.getLeft() == node && node.getHeight() - node.getLeft().getHeight() == 2) {
+						//case 3 of left child: rotate left then right
+						rotatedChild = node.getRight();
+						amount += rotations.rotateLeftNRight(rotatedChild);
+					} else {
+						//case 3 of right child: rotate right then left
+						rotatedChild = node.getLeft();
+						amount += rotations.rotateRightNLeft(rotatedChild);
+					}
+					amount += rotatedChild.promote();
+					amount += rotatedChild.getLeft().demote();
+					amount += rotatedChild.getRight().demote();
 				}
 			}
 			//otherwise, parent is not a leaf and no rebalancing is needed
@@ -245,6 +249,20 @@ public class AVLTree {
 		public void setHeight(int height); // sets the height of the node
 
 		public int getHeight(); // Returns the height of the node (-1 for virtual nodes)
+
+		/**
+		 * Increases height by 1
+		 *
+		 * @return the time complexity of the action
+		 */
+		int promote();
+
+		/**
+		 * Decreases height by 1
+		 *
+		 * @return the time complexity of the action
+		 */
+		int demote();
 	}
 
 	/**
@@ -335,6 +353,16 @@ public class AVLTree {
 		public int getHeight() {
 			return height;
 		}
+
+		public int promote() {
+			setHeight(getHeight() + 1);
+			return 1;
+		}
+
+		public int demote() {
+			setHeight(getHeight() - 1);
+			return 1;
+		}
 	}
 
 	class Rotations {
@@ -343,8 +371,9 @@ public class AVLTree {
 		 * Perform a left rotation
 		 *
 		 * @param node the node to rotate
+		 * @return time complexity
 		 */
-		public void rotateLeft(IAVLNode node) {
+		public int rotateLeft(IAVLNode node) {
 			IAVLNode parent = node.getParent();
 			IAVLNode leftChild = node.getLeft();
 			//update children
@@ -362,21 +391,18 @@ public class AVLTree {
 			parent.setRight(leftChild);
 
 			//update parents
-			node.setParent(parent.getParent());
-			parent.setParent(node);
-			leftChild.setParent(parent);
+			updateParents(parent, node, leftChild);
 
-			//update heights
-			node.setHeight(parent.getHeight());
-			parent.setHeight(Math.max(parent.getLeft().getHeight(), parent.getRight().getHeight()) + 1);
+			return 1;
 		}
 
 		/**
 		 * Perform a right rotation
 		 *
 		 * @param node the node to rotate
+		 * @return time complexity
 		 */
-		public void rotateRight(IAVLNode node) {
+		public int rotateRight(IAVLNode node) {
 			IAVLNode parent = node.getParent();
 			IAVLNode rightChild = node.getRight();
 			//update children
@@ -394,13 +420,48 @@ public class AVLTree {
 			parent.setLeft(rightChild);
 
 			//update parents
+			updateParents(parent, node, rightChild);
+
+			return 1;
+		}
+
+		/**
+		 * Perform a double rotation of left and right
+		 *
+		 * @param node the node to double rotate
+		 * @return time complexity
+		 */
+		public int rotateLeftNRight(IAVLNode node) {
+			int actions = 0;
+			actions += rotateLeft(node);
+			actions += rotateRight(node);
+			return actions;
+		}
+
+		/**
+		 * Perform a double rotation of right and left
+		 *
+		 * @param node the node to double rotate
+		 * @return time complexity
+		 */
+		public int rotateRightNLeft(IAVLNode node) {
+			int actions = 0;
+			actions += rotateRight(node);
+			actions += rotateLeft(node);
+			return actions;
+		}
+
+		/**
+		 * Update the parent field of nodes involved in a rotation
+		 *
+		 * @param parent     the parent of the rotated node
+		 * @param node       the rotated node
+		 * @param nodesChild the rotated node's child (left child for left rotation, right child for right rotation)
+		 */
+		private void updateParents(IAVLNode parent, IAVLNode node, IAVLNode nodesChild) {
 			node.setParent(parent.getParent());
 			parent.setParent(node);
-			rightChild.setParent(parent);
-
-			//update heights
-			node.setHeight(parent.getHeight());
-			parent.setHeight(Math.max(parent.getLeft().getHeight(), parent.getRight().getHeight()) + 1);
+			nodesChild.setParent(parent);
 		}
 	}
 

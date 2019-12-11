@@ -18,10 +18,12 @@ public class TestUtils {
 	/**
 	 * Tests all the basic attributes of a binary search tree
 	 */
-	public static void testBST(AVLTree tree) {
+	public static void testBST(AVLTree tree, boolean testHeights) {
 		testOrder(tree);
 		testUnrealLeaves(tree);
-		testHeights(tree, false);
+		if (testHeights) {
+			testHeights(tree, false);
+		}
 		testParents(tree);
 	}
 
