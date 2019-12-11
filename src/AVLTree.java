@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 /**
  * AVLTree
  * <p>
@@ -7,6 +9,7 @@
 
 public class AVLTree {
 	protected IAVLNode root;
+	protected int treeSize = 0;
 	private Rotations rotations = new Rotations();
 
 	//region private methods
@@ -55,6 +58,17 @@ public class AVLTree {
 			//otherwise, parent is not a leaf and no rebalancing is needed
 		}
 		return amount;
+	}
+
+	private int inorderScan(IAVLNode node, IAVLNode[] arr, int index) {
+		if (node != null && node.isRealNode()) {
+			int amount = inorderScan(node.getLeft(), arr, index);
+			index += amount;
+			arr[index] = node;
+			amount += 1 + inorderScan(node.getRight(), arr, index + 1);
+			return amount;
+		}
+		return 0;
 	}
 
 	//endregion
@@ -113,6 +127,7 @@ public class AVLTree {
 			//TODO: should promotions also count as rebalances?
 			rebalances = rebalance(node);
 		}
+		treeSize++;
 		return rebalances;
 	}
 
@@ -155,8 +170,9 @@ public class AVLTree {
 	 * or an empty array if the tree is empty.
 	 */
 	public int[] keysToArray() {
-		int[] arr = new int[42]; // to be replaced by student code
-		return arr;              // to be replaced by student code
+		IAVLNode[] arr = new IAVLNode[size()];
+		inorderScan(getRoot(), arr, 0);
+		return Arrays.stream(arr).mapToInt(n -> n.getKey()).toArray();
 	}
 
 	/**
@@ -167,8 +183,9 @@ public class AVLTree {
 	 * or an empty array if the tree is empty.
 	 */
 	public String[] infoToArray() {
-		String[] arr = new String[42]; // to be replaced by student code
-		return arr;                    // to be replaced by student code
+		IAVLNode[] arr = new IAVLNode[size()];
+		inorderScan(getRoot(), arr, 0);
+		return Arrays.stream(arr).map(n -> n.getValue()).toArray(String[]::new);
 	}
 
 	/**
@@ -180,7 +197,7 @@ public class AVLTree {
 	 * postcondition: none
 	 */
 	public int size() {
-		return 42; // to be replaced by student code
+		return treeSize;
 	}
 
 	/**
