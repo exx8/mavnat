@@ -59,11 +59,13 @@ public class JoinTest {
 		tree.insert(1, "a");
 		tree.insert(2, "a");
 		tree.insert(4, "a");
+		TreePrinter.print(tree, false);
 
 		AVLTree tree2 = new AVLTree();
 		tree2.insert(20, "a");
 		tree2.insert(19, "a");
 		tree2.insert(35, "a");
+		TreePrinter.print(tree2, false);
 
 		AVLTree.IAVLNode x = tree2.new AVLNode(9, "a");
 		int complexity = tree.join(x, tree2);

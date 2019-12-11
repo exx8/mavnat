@@ -248,16 +248,17 @@ public class AVLTree {
 		}
 		x.setParent(node.getParent());
 		node.setParent(x);
+		smallerTree.root.setParent(x);
 		x.setHeight(smallerTree.getRoot().getHeight() + 1);
 		if (node == largerTree.getRoot()) {
-			//if the heights of both tree are identical, x will becomre their new root
-			largerTree.root = x;
-		}
-		if (!isLarger) {
+			//if the heights of both tree are identical, x will become their new root
+			smallerTree.root.setParent(x);
+			root = x;
+		} else if (!isLarger) {
 			//if this tree's height is smaller than t's height, its root should change to be t's root
 			root = largerTree.root;
 		}
-		rebalance(node);
+		rebalance(x);
 		return complexity + 1;
 	}
 

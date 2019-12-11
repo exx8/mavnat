@@ -57,7 +57,7 @@ public class TestUtils {
 
 	public static void testParentsRec(AVLTree.IAVLNode node, AVLTree.IAVLNode parent) {
 		if (node != null) {
-			Assertions.assertSame(node.getParent(), parent);
+			Assertions.assertSame(parent, node.getParent(), String.format("Node %d has incorrect parent field", node.getKey()));
 			testParentsRec(node.getLeft(), node);
 			testParentsRec(node.getRight(), node);
 		}
