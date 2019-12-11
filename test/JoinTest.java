@@ -1,42 +1,13 @@
 import org.junit.jupiter.api.Test;
 
+import java.util.Random;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-class AVLTreeTest {
+public class JoinTest {
 
 	@Test
-	void createTreeTest() {
-		AVLTree tree = new AVLTree();
-		tree.insert(15, "a");
-		tree.insert(11, "a");
-		tree.insert(17, "a");
-		tree.insert(18, "a");
-		tree.insert(12, "a");
-		tree.insert(13, "a");
-		TreePrinter.print(tree, false);
-	}
-
-	@Test
-	void createTreeAVLTest() {
-		AVLTree tree = new AVLTree();
-		int rebalances = tree.insert(5, "a");
-		rebalances = tree.insert(10, "a");
-		rebalances = tree.insert(12, "a");
-		rebalances = tree.insert(4, "a");
-		rebalances = tree.insert(15, "a");
-		rebalances = tree.insert(1, "a");
-		rebalances = tree.insert(3, "a");
-		rebalances = tree.insert(17, "a");
-		rebalances = tree.insert(8, "a");
-		rebalances = tree.insert(2, "a");
-		rebalances = tree.insert(14, "a");
-		rebalances = tree.insert(16, "a");
-
-		TreePrinter.print(tree, false);
-	}
-
-	@Test
-	void joinTreesExp() {
+	void joinTreesTest_EqualSize() {
 		AVLTree tree = new AVLTree();
 		tree.insert(3, "a");
 		tree.insert(5, "a");
@@ -56,10 +27,11 @@ class AVLTreeTest {
 		AVLTree.IAVLNode x = tree2.new AVLNode(9, "a");
 		int complexity = tree.join(x, tree2);
 		TreePrinter.print(tree, false);
+		TestUtils.testAVL(tree);
 	}
 
 	@Test
-	void joinTreesExp2() {
+	void joinTreesTest_JoinedIntoSmaller() {
 		AVLTree tree = new AVLTree();
 		tree.insert(3, "a");
 		tree.insert(5, "a");
@@ -75,10 +47,11 @@ class AVLTreeTest {
 		AVLTree.IAVLNode x = tree2.new AVLNode(9, "a");
 		int complexity = tree.join(x, tree2);
 		TreePrinter.print(tree, false);
+		TestUtils.testAVL(tree);
 	}
 
 	@Test
-	void joinTreesExp3() {
+	void joinTreesTest_JoinedIntoLarger() {
 		AVLTree tree = new AVLTree();
 		tree.insert(3, "a");
 		tree.insert(5, "a");
@@ -95,5 +68,6 @@ class AVLTreeTest {
 		AVLTree.IAVLNode x = tree2.new AVLNode(9, "a");
 		int complexity = tree.join(x, tree2);
 		TreePrinter.print(tree, false);
+		TestUtils.testAVL(tree);
 	}
 }
