@@ -11,53 +11,68 @@ public class AVLTree {
 	protected IAVLNode root;
 	protected int treeSize = 0;
 	private Rotations rotations = new Rotations();
+	private Balancer balancer = new Balancer();
 
 	//region private methods
 
 	/**
-	 * Rebalances a node after insertion to the tree.
+	 * Find the leftmost or rightmost subtree with a maximum height
+	 * <p>
+	 * precondition: a node with height smaller or equal to maxHeight exists
+	 * </p>
 	 *
-	 * @param node the node to rebalance
-	 * @return the number of rebalances that occurred
+	 * @param left      the side of the tree to go down to
+	 * @param maxHeight the maximum height of the subtree
+	 * @return the root of the subtree
 	 */
-	private int rebalance(IAVLNode node) {
-		int amount = 0;
-		IAVLNode parent = node.getParent();
-		if (parent != null) {
-			IAVLNode otherChild = parent.getLeft() == node ? parent.getRight() : parent.getLeft();
-			if (parent.getHeight() - node.getHeight() == 0) {
-				if (parent.getHeight() - otherChild.getHeight() == 1) {
-					//case 1: promote
-					amount += parent.promote();
-					amount += rebalance(parent);
-				} else if (parent.getLeft() == node && node.getHeight() - node.getLeft().getHeight() == 1) {
-					//case 2 of left child: rotate right
-					amount += rotations.rotateRight(node);
-					amount += node.getRight().demote();
-				} else if (parent.getRight() == node && node.getHeight() - node.getRight().getHeight() == 1) {
-					//case 2 of right child: rotate left
-					amount += rotations.rotateLeft(node);
-					amount += node.getLeft().demote();
+	private IAVLNode findSubtreeByHeight(boolean left, int maxHeight) {
+		IAVLNode node = getRoot();
+		while (node.getHeight() > maxHeight) {
+			//find the first node with height<=maxHeight
+			if (left) {
+				node = node.getLeft();
+			} else {
+				node = node.getRight();
+			}
+		}
+		return node;
+	}
+
+	/**
+	 * Inserts a node to the AVL tree.
+	 *
+	 * @param node the node to insert
+	 * @return the number of rebalancing operations, or 0 if no rebalancing operations were necessary.
+	 * returns -1 if an item with key k already exists in the tree.
+	 */
+	private int insertNode(IAVLNode node) {
+		node.setFakeLeft();
+		node.setFakeRight();
+		int k = node.getKey();
+		int rebalances = 0;
+		if (getRoot() == null) {
+			root = node;
+		} else {
+			IAVLNode currNode = getRoot();
+			while (currNode.isRealNode()) {
+				if (k < currNode.getKey()) {
+					currNode = currNode.getLeft();
+				} else if (k > currNode.getKey()) {
+					currNode = currNode.getRight();
 				} else {
-					//case 3
-					IAVLNode rotatedChild;
-					if (parent.getLeft() == node && node.getHeight() - node.getLeft().getHeight() == 2) {
-						//case 3 of left child: rotate left then right
-						rotatedChild = node.getRight();
-						amount += rotations.rotateLeftNRight(rotatedChild);
-					} else {
-						//case 3 of right child: rotate right then left
-						rotatedChild = node.getLeft();
-						amount += rotations.rotateRightNLeft(rotatedChild);
-					}
-					amount += rotatedChild.promote();
-					amount += rotatedChild.getLeft().demote();
-					amount += rotatedChild.getRight().demote();
+					return -1;
 				}
 			}
-			//otherwise, parent is not a leaf and no rebalancing is needed
+			if (currNode.getParent().getLeft() == currNode) {
+				currNode.getParent().setLeft(node);
+			} else {
+				currNode.getParent().setRight(node);
+			}
+			node.setParent(currNode.getParent());
+			rebalances = balancer.rebalanceInsertion(node);
 		}
-		return amount;
+		treeSize++;
+		return rebalances;
 	}
 
 	private int inorderScan(IAVLNode node, IAVLNode[] arr, int index) {
@@ -79,7 +94,7 @@ public class AVLTree {
 	 * returns true if and only if the tree is empty
 	 */
 	public boolean empty() {
-		return false; // to be replaced by student code
+		return getRoot() == null;
 	}
 
 	/**
@@ -102,33 +117,8 @@ public class AVLTree {
 	 */
 	public int insert(int k, String i) {
 		IAVLNode node = new AVLNode(k, i);
-		node.setFakeLeft();
-		node.setFakeRight();
-		int rebalances = 0;
-		if (getRoot() == null) {
-			root = node;
-		} else {
-			IAVLNode currNode = getRoot();
-			while (currNode.isRealNode()) {
-				if (k < currNode.getKey()) {
-					currNode = currNode.getLeft();
-				} else if (k > currNode.getKey()) {
-					currNode = currNode.getRight();
-				} else {
-					return -1;
-				}
-			}
-			if (currNode.getParent().getLeft() == currNode) {
-				currNode.getParent().setLeft(node);
-			} else {
-				currNode.getParent().setRight(node);
-			}
-			node.setParent(currNode.getParent());
-			//TODO: should promotions also count as rebalances?
-			rebalances = rebalance(node);
-		}
-		treeSize++;
-		return rebalances;
+
+		return insertNode(node);
 	}
 
 	/**
@@ -233,7 +223,59 @@ public class AVLTree {
 	 * postcondition: none
 	 */
 	public int join(IAVLNode x, AVLTree t) {
-		return 0;
+		int complexity = Math.abs(getHeight() - t.getHeight()) + 1;
+		int newSize = size() + t.size() + 1;
+		if (empty() || t.empty()) {
+			if (empty()) {
+				root = t.getRoot();
+			}
+			insertNode(x);
+		} else {
+			//both trees have a root node
+			boolean isLarger = getRoot().getHeight() > t.getRoot().getHeight();
+			AVLTree largerTree = isLarger ? this : t;
+			AVLTree smallerTree = isLarger ? t : this;
+			IAVLNode joinNode; //the first large tree's node with height<=small tree's height
+			if (x.getKey() < largerTree.getRoot().getKey()) {
+				//the key of x is smaller than the large tree's keys
+				joinNode = largerTree.findSubtreeByHeight(true, smallerTree.getHeight());
+				x.setLeft(smallerTree.getRoot());
+				x.setRight(joinNode);
+				if (joinNode.getParent() != null) {
+					joinNode.getParent().setLeft(x);
+				}
+			} else {
+				//the key of x is bigger than the large tree's keys
+				joinNode = largerTree.findSubtreeByHeight(false, smallerTree.getHeight());
+				x.setRight(smallerTree.getRoot());
+				x.setLeft(joinNode);
+				if (joinNode.getParent() != null) {
+					joinNode.getParent().setRight(x);
+				}
+			}
+			x.setParent(joinNode.getParent());
+			joinNode.setParent(x);
+			smallerTree.root.setParent(x);
+			x.setHeight(smallerTree.getHeight() + 1);
+			if (joinNode == largerTree.getRoot()) {
+				//if the heights of both tree are identical, x will become their new root
+				root = x;
+			} else if (!isLarger) {
+				//if this tree's height is smaller than t's height, its root should change to be t's root
+				root = largerTree.root;
+			}
+			balancer.rebalanceInsertion(x);
+		}
+		treeSize = newSize;
+		return complexity;
+	}
+
+	public int getHeight() {
+		if (getRoot() != null) {
+			return getRoot().getHeight();
+		} else {
+			return -1;
+		}
 	}
 
 	/**
@@ -482,6 +524,118 @@ public class AVLTree {
 		}
 	}
 
+	class Balancer {
+		/**
+		 * Rebalances a node after insertion to the tree.
+		 *
+		 * @param node the node to rebalance
+		 * @return the number of rebalances that occurred
+		 */
+		public int rebalanceInsertion(IAVLNode node) {
+			int amount = 0;
+			IAVLNode parent = node.getParent();
+			if (parent != null) {
+				IAVLNode otherChild = parent.getLeft() == node ? parent.getRight() : parent.getLeft();
+				int parentDif = parent.getHeight() - node.getHeight(); //height difference from parent
+				int parentOtherDif = parent.getHeight() - otherChild.getHeight(); //height difference of other child from parent
+				int leftDif = node.getHeight() - node.getLeft().getHeight(); //height difference from left child
+				int rightDif = node.getHeight() - node.getRight().getHeight(); //height difference from right child
+				if (parentDif == 0) {
+					if (parentOtherDif == 1) {
+						//case 1: promote
+						amount += handleInsertionCase1(parent);
+					} else if (parentOtherDif == 2) {
+						if ((parent.getLeft() == node && leftDif == 1 && rightDif == 2) ||
+							(parent.getRight() == node && leftDif == 2 && rightDif == 1) ||
+							(leftDif == 1 && rightDif == 1)) {
+							//case 2
+							amount += handleInsertionCase2(parent, node, leftDif, rightDif);
+						} else {
+							//case 3
+							amount += handleInsertionCase3(parent, node, leftDif, rightDif);
+						}
+					} else {
+						throw new IllegalStateException("Unsupported rebalance state");
+					}
+				} else if (parentDif != 1 || parentOtherDif != 1) {
+					throw new IllegalStateException("Unsupported rebalance state");
+				}
+				//otherwise, parent was not a leaf and no rebalancing is needed
+			}
+			return amount;
+		}
+
+		/**
+		 * Handle case 1 of insertion, which requires promotion and additional rebalancing
+		 *
+		 * @param parent the rebalanced node's parent
+		 * @return time complexity of the operation
+		 */
+		private int handleInsertionCase1(IAVLNode parent) {
+			int amount = 0;
+			amount += parent.promote();
+			amount += rebalanceInsertion(parent);
+			return amount;
+		}
+
+		/**
+		 * Handle case 2 of insertion, which requires rotation
+		 *
+		 * @param parent   the rebalanced node's parent
+		 * @param node     the rebalanced node
+		 * @param leftDif  the height difference between the rebalanced node and its left child
+		 * @param rightDif the height difference between the rebalanced node and its right child
+		 * @return time complexity of the operation
+		 */
+		private int handleInsertionCase2(IAVLNode parent, IAVLNode node, int leftDif, int rightDif) {
+			int amount = 0;
+			if (parent.getLeft() == node) {
+				//case 2 of left child: rotate right
+				amount += rotations.rotateRight(node);
+			} else {
+				//case 2 of right child: rotate left
+				amount += rotations.rotateLeft(node);
+			}
+			if (leftDif != rightDif) {
+				amount += parent.demote();
+			} else {
+				//this is a case that may happen in join where leftDif=rightDif=1
+				//after the rotation, it becomes case 1 and more rebalancing is needed
+				amount += node.promote();
+				amount += rebalanceInsertion(node);
+			}
+			return amount;
+		}
+
+		/**
+		 * Handle case 3 of insertion, which requires double rotation
+		 *
+		 * @param parent   the rebalanced node's parent
+		 * @param node     the rebalanced node
+		 * @param leftDif  the height difference between the rebalanced node and its left child
+		 * @param rightDif the height difference between the rebalanced node and its right child
+		 * @return time complexity of the operation
+		 */
+		private int handleInsertionCase3(IAVLNode parent, IAVLNode node, int leftDif, int rightDif) {
+			int amount = 0;
+			IAVLNode rotatedChild;
+			if (parent.getLeft() == node && leftDif == 2 && rightDif == 1) {
+				//case 3 of left child: rotate left then right
+				rotatedChild = node.getRight();
+				amount += rotations.rotateLeftNRight(rotatedChild);
+			} else if (parent.getRight() == node && leftDif == 1 && rightDif == 2) {
+				//case 3 of right child: rotate right then left
+				rotatedChild = node.getLeft();
+				amount += rotations.rotateRightNLeft(rotatedChild);
+			} else {
+				throw new IllegalStateException("Unsupported rebalance state");
+			}
+			amount += rotatedChild.promote();
+			amount += rotatedChild.getLeft().demote();
+			amount += rotatedChild.getRight().demote();
+			return amount;
+		}
+	}
 }
   
 
