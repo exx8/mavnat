@@ -13,6 +13,7 @@ public class TestUtils {
 		testUnrealLeaves(tree);
 		testHeights(tree, true);
 		testParents(tree);
+		testSize(tree);
 	}
 
 	/**
@@ -25,11 +26,26 @@ public class TestUtils {
 			testHeights(tree, false);
 		}
 		testParents(tree);
+		testSize(tree);
 	}
 
 	public static void testHeights(AVLTree tree, boolean testAVLdif) {
 		if (tree.getRoot() != null) {
 			testHeightRec(tree.getRoot(), testAVLdif);
+		}
+	}
+
+	public static void testSize(AVLTree tree) {
+		int actualSize = testSizeRec(tree.getRoot());
+		Assertions.assertEquals(actualSize, tree.size());
+	}
+
+	private static int testSizeRec(AVLTree.IAVLNode node) {
+		if (node == null || !node.isRealNode()) {
+			return 0;
+		} else {
+			int size = testSizeRec(node.getLeft()) + testSizeRec(node.getRight()) + 1;
+			return size;
 		}
 	}
 
@@ -98,6 +114,7 @@ public class TestUtils {
 		tree.root = root;
 		generateTreeNode(tree, root, preorder, 1, preorder.size());
 		updateHeightRec(root);
+		tree.treeSize = preorder.size();
 		return tree;
 	}
 
