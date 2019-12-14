@@ -7,6 +7,15 @@ public class TreePrinter {
 	 *
 	 * @param tree an AVL tree
 	 */
+	public static void print(AVLTree tree) {
+		print(tree, false);
+	}
+
+	/**
+	 * Prints a tree object to the console
+	 *
+	 * @param tree an AVL tree
+	 */
 	public static void print(AVLTree tree, boolean printHeights) {
 		if (!tree.empty()) {
 			int treeHeight = tree.getRoot().getHeight();

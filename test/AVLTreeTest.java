@@ -5,34 +5,57 @@ import static org.junit.jupiter.api.Assertions.*;
 class AVLTreeTest {
 
 	@Test
-	void createTreeTest() {
+	void keysToArrayTest() {
 		AVLTree tree = new AVLTree();
-		tree.insert(15, "a");
-		tree.insert(11, "a");
+		tree.insert(10, "a");
+		tree.insert(2, "a");
 		tree.insert(17, "a");
-		tree.insert(18, "a");
-		tree.insert(12, "a");
-		tree.insert(13, "a");
-		TreePrinter.print(tree, false);
+		tree.insert(54, "a");
+		tree.insert(3, "a");
+		tree.insert(4, "a");
+		tree.insert(8, "a");
+		tree.insert(1, "a");
+
+		int[] keys = tree.keysToArray();
+
+		int[] expectedKeys = {1, 2, 3, 4, 8, 10, 17, 54};
+		assertArrayEquals(expectedKeys, keys);
 	}
 
 	@Test
-	void createTreeAVLTest() {
+	void keysToArrayTest_EmptyTree() {
 		AVLTree tree = new AVLTree();
-		int rebalances = tree.insert(5, "a");
-		rebalances = tree.insert(10, "a");
-		rebalances = tree.insert(12, "a");
-		rebalances = tree.insert(4, "a");
-		rebalances = tree.insert(15, "a");
-		rebalances = tree.insert(1, "a");
-		rebalances = tree.insert(3, "a");
-		rebalances = tree.insert(17, "a");
-		rebalances = tree.insert(8, "a");
-		rebalances = tree.insert(2, "a");
-		rebalances = tree.insert(14, "a");
-		rebalances = tree.insert(16, "a");
 
-		TreePrinter.print(tree, false);
+		int[] keys = tree.keysToArray();
+
+		assertArrayEquals(new int[]{}, keys);
+	}
+
+	@Test
+	void infoToArrayTest() {
+		AVLTree tree = new AVLTree();
+		tree.insert(2, "b");
+		tree.insert(3, "c");
+		tree.insert(6, "d");
+		tree.insert(22, "g");
+		tree.insert(8, "e");
+		tree.insert(34, "h");
+		tree.insert(0, "a");
+		tree.insert(9, "f");
+
+		String[] values = tree.infoToArray();
+
+		String[] expectedValues = {"a", "b", "c", "d", "e", "f", "g", "h"};
+		assertArrayEquals(expectedValues, values);
+	}
+
+	@Test
+	void infoToArrayTest_EmptyTree() {
+		AVLTree tree = new AVLTree();
+
+		String[] values = tree.infoToArray();
+
+		assertArrayEquals(new String[]{}, values);
 	}
 
 	@Test
