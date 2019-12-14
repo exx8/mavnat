@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 /**
  * AVLTree
  * <p>
@@ -71,6 +73,17 @@ public class AVLTree {
 		}
 		treeSize++;
 		return rebalances;
+	}
+
+	private int inorderScan(IAVLNode node, IAVLNode[] arr, int index) {
+		if (node != null && node.isRealNode()) {
+			int amount = inorderScan(node.getLeft(), arr, index);
+			index += amount;
+			arr[index] = node;
+			amount += 1 + inorderScan(node.getRight(), arr, index + 1);
+			return amount;
+		}
+		return 0;
 	}
 
 	//endregion
@@ -147,8 +160,9 @@ public class AVLTree {
 	 * or an empty array if the tree is empty.
 	 */
 	public int[] keysToArray() {
-		int[] arr = new int[42]; // to be replaced by student code
-		return arr;              // to be replaced by student code
+		IAVLNode[] arr = new IAVLNode[size()];
+		inorderScan(getRoot(), arr, 0);
+		return Arrays.stream(arr).mapToInt(n -> n.getKey()).toArray();
 	}
 
 	/**
@@ -159,8 +173,9 @@ public class AVLTree {
 	 * or an empty array if the tree is empty.
 	 */
 	public String[] infoToArray() {
-		String[] arr = new String[42]; // to be replaced by student code
-		return arr;                    // to be replaced by student code
+		IAVLNode[] arr = new IAVLNode[size()];
+		inorderScan(getRoot(), arr, 0);
+		return Arrays.stream(arr).map(n -> n.getValue()).toArray(String[]::new);
 	}
 
 	/**
@@ -552,6 +567,7 @@ public class AVLTree {
 
 		/**
 		 * Handle case 1 of insertion, which requires promotion and additional rebalancing
+		 *
 		 * @param parent the rebalanced node's parent
 		 * @return time complexity of the operation
 		 */
@@ -564,9 +580,10 @@ public class AVLTree {
 
 		/**
 		 * Handle case 2 of insertion, which requires rotation
-		 * @param parent the rebalanced node's parent
-		 * @param node the rebalanced node
-		 * @param leftDif the height difference between the rebalanced node and its left child
+		 *
+		 * @param parent   the rebalanced node's parent
+		 * @param node     the rebalanced node
+		 * @param leftDif  the height difference between the rebalanced node and its left child
 		 * @param rightDif the height difference between the rebalanced node and its right child
 		 * @return time complexity of the operation
 		 */
@@ -592,9 +609,10 @@ public class AVLTree {
 
 		/**
 		 * Handle case 3 of insertion, which requires double rotation
-		 * @param parent the rebalanced node's parent
-		 * @param node the rebalanced node
-		 * @param leftDif the height difference between the rebalanced node and its left child
+		 *
+		 * @param parent   the rebalanced node's parent
+		 * @param node     the rebalanced node
+		 * @param leftDif  the height difference between the rebalanced node and its left child
 		 * @param rightDif the height difference between the rebalanced node and its right child
 		 * @return time complexity of the operation
 		 */

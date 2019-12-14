@@ -112,6 +112,7 @@ public class TestUtils {
 		AVLTree tree = new AVLTree();
 		AVLTree.IAVLNode root = tree.new AVLNode(preorder.get(0), "a");
 		tree.root = root;
+		tree.treeSize = preorder.size();
 		generateTreeNode(tree, root, preorder, 1, preorder.size());
 		updateHeightRec(root);
 		tree.treeSize = preorder.size();
