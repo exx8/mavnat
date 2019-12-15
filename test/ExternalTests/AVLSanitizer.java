@@ -40,26 +40,7 @@ public class AVLSanitizer {
 			  System.out.format("Height should be %d but is %d%n", calcHeight(root), root.getHeight());
 			  return false;
 		  }
-		  
-		  if (calcSize(root) != root.getSubtreeSize())
-		  {
-			  System.out.format("Size should be %d but is %d%n", calcSize(root), root.getSubtreeSize());
-			  calcSize(root);
-			  return false;
-		  }
-			  
-		  if (calcSum(root) != root.getSubtreeSum())
-		  {
-			  System.out.format("Sum should be %d but is %d%n", calcSum(root), root.getSubtreeSum());
-			  return false;
-		  }
-		  
-		  int bf = calcHeight(root.getLeft()) - calcHeight(root.getRight());
-		  if (Math.abs(bf) >= 2)
-		  {
-			  System.out.format("Balance factor should be out of range %d%n", bf, root.getSubtreeSize());
-			  return false;
-		  }
+
 		  
 		  return sanitizeTree(root.getLeft()) && sanitizeTree(root.getRight());
 	  }

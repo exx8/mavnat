@@ -165,7 +165,7 @@ public class AVLTree {
 
 		updateNextRootProps(deletedRoot, parentOfDeletedRoot, nextRoot);
 
-		return rebalance(nextRoot);
+		return 0;//rebalance(nextRoot);
 	}
 
 	private void updateNextRootProps(IAVLNode deletedRoot, IAVLNode parentOfDeletedRoot, IAVLNode nextRoot) {
@@ -183,7 +183,7 @@ public class AVLTree {
 			parentOfDeletedRoot.setRight(deletedRootLeftChild);
 		}
 		deletedRootLeftChild.setParent(parentOfDeletedRoot);
-		return rebalance(parentOfDeletedRoot);
+		return 0;//rebalance(parentOfDeletedRoot);
 	}
 
 	protected static Optional<IAVLNode> findMin(IAVLNode node) {
