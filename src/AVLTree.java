@@ -241,8 +241,20 @@ protected int deletion_rebalance(IAVLNode nextRootPreviousParent)
 		if(nextRootPreviousParentRight.getRight().getHeight()- nextRootPreviousParentRight.getHeight()==1&& nextRootPreviousParentRight.getLeft().getHeight()- nextRootPreviousParentRight.getHeight()==1) {
 			rotations.rotateLeft((nextRootPreviousParent));
 			demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
+			promoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
+
 			return deletion_rebalance(nextRootPreviousParent.getParent())+1;
 		}
+		//case 3 left left
+		if(nextRootPreviousParentRight.getRight().getHeight()- nextRootPreviousParentRight.getHeight()==1&& nextRootPreviousParentRight.getLeft().getHeight()- nextRootPreviousParentRight.getHeight()==2) {
+			rotations.rotateLeft((nextRootPreviousParent));
+			demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
+			demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
+
+			return deletion_rebalance(nextRootPreviousParent.getParent())+1;
+		}
+		//@todo case 3 left right
+
 
 	}
 	else if(rightToParentHeightGap==1&&leftToParentHeightGap==3)
@@ -251,8 +263,14 @@ protected int deletion_rebalance(IAVLNode nextRootPreviousParent)
 		if(nextRootPreviousParentLeft.getRight().getHeight()- nextRootPreviousParentLeft.getHeight()==1&& nextRootPreviousParentLeft.getLeft().getHeight()- nextRootPreviousParentLeft.getHeight()==1) {
 			rotations.rotateRight((nextRootPreviousParent));
 			demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
+			promoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
+
 			return deletion_rebalance(nextRootPreviousParent.getParent())+1;
 		}
+		//@todo case 3 right left
+		//@todo case 3 right right
+
+
 
 	}
 
@@ -262,6 +280,9 @@ protected int deletion_rebalance(IAVLNode nextRootPreviousParent)
 
 	private void demoteAvlHeight(IAVLNode nextRootPreviousParent, int nextRootPreviousParentHeight) {
 		nextRootPreviousParent.setHeight(nextRootPreviousParentHeight - 1);
+	}
+	private void promoteAvlHeight(IAVLNode nextRootPreviousParent, int nextRootPreviousParentHeight) {
+		nextRootPreviousParent.setHeight(nextRootPreviousParentHeight +1 1);
 	}
 
 	/**
