@@ -214,48 +214,9 @@ class AVLTreeTest {
 		assertEquals(null, tree.getRoot().getParent());
 	}
 
-	@Test
-	void testSelect() {
-		{
-			AVLTree tree = new AVLTree();
-			assertEquals(null, tree.select(0));
-		}
-		
-		int[] values = randomArray(100, 0, 100);
-		AVLTree tree = arrayToTree(values);
-		Arrays.sort(values);
-		
-		values = Arrays.stream(values).distinct().toArray();
-		for (int i = 0; i < values.length; i++)
-		{
-			//System.out.format("select %d received %s should be %d%n", i, tree.select(i + 1), values[i]);
-			assertEquals(tree.select(i + 1), Integer.toString(values[i]));
-		}
-		
-		assertEquals(tree.select(values.length + 1), null);
-		assertEquals(tree.select(0), null);
-	}
 
-	@Test
-	void testLess() {
-		{
-			AVLTree tree = new AVLTree();
-			assertEquals(0, tree.less(0));
-		}
-		
-		int[] values = randomArray(100, 0, 100);
-		AVLTree tree = arrayToTree(values);
-		Arrays.sort(values);
-		values = Arrays.stream(values).distinct().toArray();
-		
-		int sum = 0;
-		for (int i = 0; i < values.length; i++)
-		{
-			sum += values[i];
-			assertEquals(tree.less(values[i]), sum);
-		}
-		
-		assertEquals(tree.less(values[values.length - 1] + 1), sum);
-	}
+
+
+
 
 }

@@ -6,19 +6,7 @@ public class AVLSanitizer {
 		  return Math.max(calcHeight(node.getLeft()), calcHeight(node.getRight())) + 1;
 	  }
 	  
-	  public static int calcSize(AVLTree.IAVLNode node)
-	  {
-		  if (node == null || !node.isRealNode())
-			  return 0;
-		  int sizeLeft = calcSize(node.getLeft());
-		  int sizeRight = calcSize(node.getRight());
-		  int size = sizeLeft + sizeRight + 1;
-		  if (size != node.getSubtreeSize())
-		  {
-			  assert false;
-		  }
-		  return size;
-	  }
+
 	  
 	  public static int calcSum(AVLTree.IAVLNode node)
 	  {
