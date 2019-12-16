@@ -161,8 +161,10 @@ public class AVLTree {
 		final IAVLNode nextRootLeftChild = nextRoot.getLeft();
 
 		//new son to the abandoned  parent
-		nextRootParent.setRight(nextRootLeftChild);
-
+		if(parentOfDeletedRoot!=null)
+		parentOfDeletedRoot.setRight(nextRootLeftChild);
+		else
+			this.root=nextRoot;
 		updateNextRootProps(deletedRoot, parentOfDeletedRoot, nextRoot);
 
 		return deletion_rebalance(nextRootParent);
@@ -239,7 +241,7 @@ public class AVLTree {
 			return deletion_rebalance(nextRootPreviousParent.getParent()) ;
 
 		}
-		/*else if(nextRootPreviousParentLeft.getRight()==null)
+		else if(nextRootPreviousParentLeft.getRight()==null)
 		{
 			rotations.rotateRight(nextRootPreviousParentLeft);
 			return deletion_rebalance(nextRootPreviousParentLeft)+1;
@@ -259,7 +261,7 @@ public class AVLTree {
 		{
 			rotations.rotateLeft(nextRootPreviousParentLeft);
 			return deletion_rebalance(nextRootPreviousParentLeft)+1;
-		}*/
+		}
 
 		else if (rightToParentHeightGap == 3 && leftToParentHeightGap == 1) {
 			//case 2 left
