@@ -232,7 +232,7 @@ public class AVLTree {
 		else if (bothChildrenHaveSameHeight && gapBetweenLeftAndRootIs2) {
 			//case 1
 			demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
-			return deletion_rebalance(nextRootPreviousParent.getParent()) + 1;
+			return deletion_rebalance(nextRootPreviousParent.getParent()) ;
 		} else if (rightToParentHeightGap == 3 && leftToParentHeightGap == 1) {
 			//case 2 left
 			if (nextRootPreviousParentRight.getRight().getHeight() - nextRootPreviousParentRight.getHeight() == 1 && nextRootPreviousParentRight.getLeft().getHeight() - nextRootPreviousParentRight.getHeight() == 1) {
@@ -242,16 +242,21 @@ public class AVLTree {
 
 				return deletion_rebalance(nextRootPreviousParent.getParent()) + 1;
 			}
-			//case 3 left left
+			//case 3 left
 			if (nextRootPreviousParentRight.getRight().getHeight() - nextRootPreviousParentRight.getHeight() == 1 && nextRootPreviousParentRight.getLeft().getHeight() - nextRootPreviousParentRight.getHeight() == 2) {
 				rotations.rotateLeft((nextRootPreviousParent));
 				demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
-				demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
+				demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);//twice
 
 				return deletion_rebalance(nextRootPreviousParent.getParent()) + 1;
 			}
-			//@todo case 3 left right
+			//case 4 left
+			else if (nextRootPreviousParentRight.getLeft().getHeight() - nextRootPreviousParentRight.getHeight() == 1 && nextRootPreviousParentRight.getRight().getHeight() - nextRootPreviousParentRight.getHeight() == 2) {
+				rotations.rotateLeft((nextRootPreviousParent));
+				rotations.rotateLeft((nextRootPreviousParent));//twice
 
+				return deletion_rebalance(nextRootPreviousParent.getParent()) + 2;
+			}
 
 		} else if (rightToParentHeightGap == 1 && leftToParentHeightGap == 3) {
 			//case 2 right
@@ -262,10 +267,21 @@ public class AVLTree {
 
 				return deletion_rebalance(nextRootPreviousParent.getParent()) + 1;
 			}
-			//@todo case 3 right left
-			//@todo case 3 right right
+			//case 3 right
+			if (nextRootPreviousParentLeft.getRight().getHeight() - nextRootPreviousParentLeft.getHeight() == 1 && nextRootPreviousParentLeft.getLeft().getHeight() - nextRootPreviousParentLeft.getHeight() == 2) {
+				rotations.rotateRight((nextRootPreviousParent));
+				demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
+				demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);//twice
 
+				return deletion_rebalance(nextRootPreviousParent.getParent()) + 1;
+			}
+			//case 4 right
+			else if (nextRootPreviousParentLeft.getLeft().getHeight() - nextRootPreviousParentLeft.getHeight() == 1 && nextRootPreviousParentLeft.getRight().getHeight() - nextRootPreviousParentLeft.getHeight() == 2) {
+				rotations.rotateRight((nextRootPreviousParent));
+				rotations.rotateRight((nextRootPreviousParent));//twice
 
+				return deletion_rebalance(nextRootPreviousParent.getParent()) + 2;
+			}
 		}
 
 
