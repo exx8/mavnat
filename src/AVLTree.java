@@ -165,7 +165,7 @@ public class AVLTree {
 
 		updateNextRootProps(deletedRoot, parentOfDeletedRoot, nextRoot);
 
-		return 0;//rebalance(nextRoot);
+		return deletion_rebalance(nextCurrentRootParent);
 	}
 
 	private void updateNextRootProps(IAVLNode deletedRoot, IAVLNode parentOfDeletedRoot, IAVLNode nextRoot) {
@@ -183,7 +183,7 @@ public class AVLTree {
 			parentOfDeletedRoot.setRight(deletedRootLeftChild);
 		}
 		deletedRootLeftChild.setParent(parentOfDeletedRoot);
-		return 0;//rebalance(parentOfDeletedRoot);
+		return deletion_rebalance(parentOfDeletedRoot);
 	}
 
 	protected static Optional<IAVLNode> findMin(IAVLNode node) {
@@ -213,7 +213,32 @@ public class AVLTree {
 
 	}
 
+protected int deletion_rebalance(IAVLNode nextRootPreviousParent)
+{
+	if(nextRootPreviousParent==null)
+		return 0;
+	final boolean bothChildrenHaveSameHeight = nextRootPreviousParent.getRight().getHeight() == nextRootPreviousParent.getLeft().getHeight();
+	final int nextRootPreviousParentHeight = nextRootPreviousParent.getHeight();
+	final int leftToParentHeightGap = nextRootPreviousParent.getLeft().getHeight() - nextRootPreviousParentHeight;
+	final int rightToParentHeightGap = nextRootPreviousParent.getRight().getHeight() - nextRootPreviousParentHeight;
 
+	final boolean gapBetweenLeftAndRootIs2 = leftToParentHeightGap == 2;
+	if(bothChildrenHaveSameHeight && gapBetweenLeftAndRootIs2) {
+		//case 1
+		nextRootPreviousParent.setHeight(nextRootPreviousParentHeight - 1);
+	return deletion_rebalance(nextRootPreviousParent.getParent())+1;
+	}
+	else if(rightToParentHeightGap==3&&leftToParentHeightGap==1)
+	{
+		//case 2 left
+		if(nextRootPreviousParent.getRight().getRight().getHeight()-nextRootPreviousParent.getRight().getHeight()==1&&nextRootPreviousParent.getRight().getLeft().getHeight()-nextRootPreviousParent.getRight().getHeight()==1) {
+			rotations.rotateLeft((nextRootPreviousParent));
+			nextRootPreviousParent.setHeight(nextRootPreviousParentHeight - 1);
+			return deletion_rebalance(nextRootPreviousParent.getParent())+1;
+		}
+	}
+
+}
 	/**
 	 * public String min()
 	 * <p>
