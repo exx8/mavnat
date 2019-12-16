@@ -223,8 +223,8 @@ public class AVLTree {
 
 		final boolean bothChildrenHaveSameHeight = nextRootPreviousParentRight.getHeight() == nextRootPreviousParent.getLeft().getHeight();
 		final int nextRootPreviousParentHeight = nextRootPreviousParent.getHeight();
-		final int leftToParentHeightGap = nextRootPreviousParent.getLeft().getHeight() - nextRootPreviousParentHeight;
-		final int rightToParentHeightGap = nextRootPreviousParentRight.getHeight() - nextRootPreviousParentHeight;
+		final int leftToParentHeightGap = nextRootPreviousParentHeight-nextRootPreviousParent.getLeft().getHeight() ;
+		final int rightToParentHeightGap = nextRootPreviousParentHeight-nextRootPreviousParentRight.getHeight() ;
 
 		final boolean gapBetweenLeftAndRootIs2 = leftToParentHeightGap == 2;
 		if (bothChildrenHaveSameHeight && leftToParentHeightGap == 1)
