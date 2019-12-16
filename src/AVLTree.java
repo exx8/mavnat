@@ -213,76 +213,70 @@ public class AVLTree {
 
 	}
 
-protected int deletion_rebalance(IAVLNode nextRootPreviousParent)
-{
-	if(nextRootPreviousParent==null)
-		return 0;
-	final IAVLNode nextRootPreviousParentRight = nextRootPreviousParent.getRight();
-	final IAVLNode nextRootPreviousParentLeft = nextRootPreviousParent.getLeft();
+	protected int deletion_rebalance(IAVLNode nextRootPreviousParent) {
+		if (nextRootPreviousParent == null)
+			return 0;
+		final IAVLNode nextRootPreviousParentRight = nextRootPreviousParent.getRight();
+		final IAVLNode nextRootPreviousParentLeft = nextRootPreviousParent.getLeft();
 
-	final boolean bothChildrenHaveSameHeight = nextRootPreviousParentRight.getHeight() == nextRootPreviousParent.getLeft().getHeight();
-	final int nextRootPreviousParentHeight = nextRootPreviousParent.getHeight();
-	final int leftToParentHeightGap = nextRootPreviousParent.getLeft().getHeight() - nextRootPreviousParentHeight;
-	final int rightToParentHeightGap = nextRootPreviousParentRight.getHeight() - nextRootPreviousParentHeight;
+		final boolean bothChildrenHaveSameHeight = nextRootPreviousParentRight.getHeight() == nextRootPreviousParent.getLeft().getHeight();
+		final int nextRootPreviousParentHeight = nextRootPreviousParent.getHeight();
+		final int leftToParentHeightGap = nextRootPreviousParent.getLeft().getHeight() - nextRootPreviousParentHeight;
+		final int rightToParentHeightGap = nextRootPreviousParentRight.getHeight() - nextRootPreviousParentHeight;
 
-	final boolean gapBetweenLeftAndRootIs2 = leftToParentHeightGap == 2;
-	if(bothChildrenHaveSameHeight&&leftToParentHeightGap==1)
-		return 0; //everything fine do nothing
-	else if((leftToParentHeightGap==2&&rightToParentHeightGap==1)&&(leftToParentHeightGap==1&&rightToParentHeightGap==2))
-		return 0; //everything fine do nothing
-	else if(bothChildrenHaveSameHeight && gapBetweenLeftAndRootIs2) {
-		//case 1
-		demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
-		return deletion_rebalance(nextRootPreviousParent.getParent())+1;
-	}
-	else if(rightToParentHeightGap==3&&leftToParentHeightGap==1)
-	{
-		//case 2 left
-		if(nextRootPreviousParentRight.getRight().getHeight()- nextRootPreviousParentRight.getHeight()==1&& nextRootPreviousParentRight.getLeft().getHeight()- nextRootPreviousParentRight.getHeight()==1) {
-			rotations.rotateLeft((nextRootPreviousParent));
+		final boolean gapBetweenLeftAndRootIs2 = leftToParentHeightGap == 2;
+		if (bothChildrenHaveSameHeight && leftToParentHeightGap == 1)
+			return 0; //everything fine do nothing
+		else if ((leftToParentHeightGap == 2 && rightToParentHeightGap == 1) && (leftToParentHeightGap == 1 && rightToParentHeightGap == 2))
+			return 0; //everything fine do nothing
+		else if (bothChildrenHaveSameHeight && gapBetweenLeftAndRootIs2) {
+			//case 1
 			demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
-			promoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
+			return deletion_rebalance(nextRootPreviousParent.getParent()) + 1;
+		} else if (rightToParentHeightGap == 3 && leftToParentHeightGap == 1) {
+			//case 2 left
+			if (nextRootPreviousParentRight.getRight().getHeight() - nextRootPreviousParentRight.getHeight() == 1 && nextRootPreviousParentRight.getLeft().getHeight() - nextRootPreviousParentRight.getHeight() == 1) {
+				rotations.rotateLeft((nextRootPreviousParent));
+				demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
+				promoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
 
-			return deletion_rebalance(nextRootPreviousParent.getParent())+1;
+				return deletion_rebalance(nextRootPreviousParent.getParent()) + 1;
+			}
+			//case 3 left left
+			if (nextRootPreviousParentRight.getRight().getHeight() - nextRootPreviousParentRight.getHeight() == 1 && nextRootPreviousParentRight.getLeft().getHeight() - nextRootPreviousParentRight.getHeight() == 2) {
+				rotations.rotateLeft((nextRootPreviousParent));
+				demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
+				demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
+
+				return deletion_rebalance(nextRootPreviousParent.getParent()) + 1;
+			}
+			//@todo case 3 left right
+
+
+		} else if (rightToParentHeightGap == 1 && leftToParentHeightGap == 3) {
+			//case 2 right
+			if (nextRootPreviousParentLeft.getRight().getHeight() - nextRootPreviousParentLeft.getHeight() == 1 && nextRootPreviousParentLeft.getLeft().getHeight() - nextRootPreviousParentLeft.getHeight() == 1) {
+				rotations.rotateRight((nextRootPreviousParent));
+				demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
+				promoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
+
+				return deletion_rebalance(nextRootPreviousParent.getParent()) + 1;
+			}
+			//@todo case 3 right left
+			//@todo case 3 right right
+
+
 		}
-		//case 3 left left
-		if(nextRootPreviousParentRight.getRight().getHeight()- nextRootPreviousParentRight.getHeight()==1&& nextRootPreviousParentRight.getLeft().getHeight()- nextRootPreviousParentRight.getHeight()==2) {
-			rotations.rotateLeft((nextRootPreviousParent));
-			demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
-			demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
-
-			return deletion_rebalance(nextRootPreviousParent.getParent())+1;
-		}
-		//@todo case 3 left right
-
-
-	}
-	else if(rightToParentHeightGap==1&&leftToParentHeightGap==3)
-	{
-		//case 2 right
-		if(nextRootPreviousParentLeft.getRight().getHeight()- nextRootPreviousParentLeft.getHeight()==1&& nextRootPreviousParentLeft.getLeft().getHeight()- nextRootPreviousParentLeft.getHeight()==1) {
-			rotations.rotateRight((nextRootPreviousParent));
-			demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
-			promoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
-
-			return deletion_rebalance(nextRootPreviousParent.getParent())+1;
-		}
-		//@todo case 3 right left
-		//@todo case 3 right right
-
 
 
 	}
-
-
-
-}
 
 	private void demoteAvlHeight(IAVLNode nextRootPreviousParent, int nextRootPreviousParentHeight) {
 		nextRootPreviousParent.setHeight(nextRootPreviousParentHeight - 1);
 	}
+
 	private void promoteAvlHeight(IAVLNode nextRootPreviousParent, int nextRootPreviousParentHeight) {
-		nextRootPreviousParent.setHeight(nextRootPreviousParentHeight +1 1);
+		nextRootPreviousParent.setHeight(nextRootPreviousParentHeight + 1 1);
 	}
 
 	/**
