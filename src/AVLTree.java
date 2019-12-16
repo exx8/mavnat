@@ -218,6 +218,8 @@ public class AVLTree {
 	protected int deletion_rebalance(IAVLNode nextRootPreviousParent) {
 		if (nextRootPreviousParent == null)
 			return 0;
+		if(!nextRootPreviousParent.isRealNode())
+			return 0;
 		final IAVLNode nextRootPreviousParentRight = nextRootPreviousParent.getRight();
 		final IAVLNode nextRootPreviousParentLeft = nextRootPreviousParent.getLeft();
 
@@ -229,13 +231,37 @@ public class AVLTree {
 		final boolean gapBetweenLeftAndRootIs2 = leftToParentHeightGap == 2;
 		if (bothChildrenHaveSameHeight && leftToParentHeightGap == 1)
 			return 0; //everything fine do nothing
-		else if ((leftToParentHeightGap == 2 && rightToParentHeightGap == 1) && (leftToParentHeightGap == 1 && rightToParentHeightGap == 2))
+		else if ((leftToParentHeightGap == 2 && rightToParentHeightGap == 1) ||(leftToParentHeightGap == 1 && rightToParentHeightGap == 2))
 			return 0; //everything fine do nothing
 		else if (bothChildrenHaveSameHeight && gapBetweenLeftAndRootIs2) {
 			//case 1
 			demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
 			return deletion_rebalance(nextRootPreviousParent.getParent()) ;
-		} else if (rightToParentHeightGap == 3 && leftToParentHeightGap == 1) {
+
+		}
+		/*else if(nextRootPreviousParentLeft.getRight()==null)
+		{
+			rotations.rotateRight(nextRootPreviousParentLeft);
+			return deletion_rebalance(nextRootPreviousParentLeft)+1;
+		}
+		else if(nextRootPreviousParentLeft.getLeft()==null)
+		{
+			rotations.rotateLeft(nextRootPreviousParentLeft);
+			return deletion_rebalance(nextRootPreviousParentLeft)+1;
+		}
+		else if(nextRootPreviousParentRight.getRight()==null)
+		{
+
+			rotations.rotateRight(nextRootPreviousParentLeft);
+			return deletion_rebalance(nextRootPreviousParentLeft)+1;
+		}
+		else if(nextRootPreviousParentRight.getLeft()==null)
+		{
+			rotations.rotateLeft(nextRootPreviousParentLeft);
+			return deletion_rebalance(nextRootPreviousParentLeft)+1;
+		}*/
+
+		else if (rightToParentHeightGap == 3 && leftToParentHeightGap == 1) {
 			//case 2 left
 			if (nextRootPreviousParentRight.getRight().getHeight() - nextRootPreviousParentRight.getHeight() == 1 && nextRootPreviousParentRight.getLeft().getHeight() - nextRootPreviousParentRight.getHeight() == 1) {
 				rotations.rotateLeft((nextRootPreviousParent));
@@ -262,7 +288,8 @@ public class AVLTree {
 
 		} else if (rightToParentHeightGap == 1 && leftToParentHeightGap == 3) {
 			//case 2 right
-			if (nextRootPreviousParentLeft.getRight().getHeight() - nextRootPreviousParentLeft.getHeight() == 1 && nextRootPreviousParentLeft.getLeft().getHeight() - nextRootPreviousParentLeft.getHeight() == 1) {
+
+			 if (nextRootPreviousParentLeft.getRight().getHeight() - nextRootPreviousParentLeft.getHeight() == 1 && nextRootPreviousParentLeft.getLeft().getHeight() - nextRootPreviousParentLeft.getHeight() == 1) {
 				rotations.rotateRight((nextRootPreviousParent));
 				demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
 				promoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
@@ -689,6 +716,7 @@ throw new RuntimeException("shouldn't have reached here");
 		private void updateParents(IAVLNode parent, IAVLNode node, IAVLNode nodesChild) {
 			node.setParent(parent.getParent());
 			parent.setParent(node);
+			if(nodesChild!=null)
 			nodesChild.setParent(parent);
 		}
 	}

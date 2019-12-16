@@ -91,10 +91,22 @@ class AVLTreeTest {
 		assertEquals(tree.delete(1), 1);
 		
 		assertTrue(AVLSanitizer.sanitizeTree(tree));
-		
-		int[] values = randomArray(100, 0, 100);
+
+		int[] values = randomArray(10, 0, 100);
 		tree = arrayToTree(values);
 		List<Integer> valuesShuffled = Arrays.stream(values).boxed().collect(Collectors.toList());
+		Collections.shuffle(valuesShuffled);
+		for (int x : valuesShuffled)
+		{
+			System.out.format("deleting %d%n", x);
+			tree.delete(x);
+			assertTrue(AVLSanitizer.sanitizeTree(tree));
+		}
+
+		
+		values = randomArray(100, 0, 100);
+		tree = arrayToTree(values);
+		valuesShuffled = Arrays.stream(values).boxed().collect(Collectors.toList());
 		Collections.shuffle(valuesShuffled);
 		for (int x : valuesShuffled)
 		{
