@@ -217,28 +217,48 @@ protected int deletion_rebalance(IAVLNode nextRootPreviousParent)
 {
 	if(nextRootPreviousParent==null)
 		return 0;
-	final boolean bothChildrenHaveSameHeight = nextRootPreviousParent.getRight().getHeight() == nextRootPreviousParent.getLeft().getHeight();
+	final IAVLNode nextRootPreviousParentRight = nextRootPreviousParent.getRight();
+	final IAVLNode nextRootPreviousParentLeft = nextRootPreviousParent.getLeft();
+
+	final boolean bothChildrenHaveSameHeight = nextRootPreviousParentRight.getHeight() == nextRootPreviousParent.getLeft().getHeight();
 	final int nextRootPreviousParentHeight = nextRootPreviousParent.getHeight();
 	final int leftToParentHeightGap = nextRootPreviousParent.getLeft().getHeight() - nextRootPreviousParentHeight;
-	final int rightToParentHeightGap = nextRootPreviousParent.getRight().getHeight() - nextRootPreviousParentHeight;
+	final int rightToParentHeightGap = nextRootPreviousParentRight.getHeight() - nextRootPreviousParentHeight;
 
 	final boolean gapBetweenLeftAndRootIs2 = leftToParentHeightGap == 2;
 	if(bothChildrenHaveSameHeight && gapBetweenLeftAndRootIs2) {
 		//case 1
-		nextRootPreviousParent.setHeight(nextRootPreviousParentHeight - 1);
-	return deletion_rebalance(nextRootPreviousParent.getParent())+1;
+		demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
+		return deletion_rebalance(nextRootPreviousParent.getParent())+1;
 	}
 	else if(rightToParentHeightGap==3&&leftToParentHeightGap==1)
 	{
 		//case 2 left
-		if(nextRootPreviousParent.getRight().getRight().getHeight()-nextRootPreviousParent.getRight().getHeight()==1&&nextRootPreviousParent.getRight().getLeft().getHeight()-nextRootPreviousParent.getRight().getHeight()==1) {
+		if(nextRootPreviousParentRight.getRight().getHeight()- nextRootPreviousParentRight.getHeight()==1&& nextRootPreviousParentRight.getLeft().getHeight()- nextRootPreviousParentRight.getHeight()==1) {
 			rotations.rotateLeft((nextRootPreviousParent));
-			nextRootPreviousParent.setHeight(nextRootPreviousParentHeight - 1);
+			demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
 			return deletion_rebalance(nextRootPreviousParent.getParent())+1;
 		}
+
+	}
+	else if(rightToParentHeightGap==1&&leftToParentHeightGap==3)
+	{
+		//case 2 right
+		if(nextRootPreviousParentLeft.getRight().getHeight()- nextRootPreviousParentLeft.getHeight()==1&& nextRootPreviousParentLeft.getLeft().getHeight()- nextRootPreviousParentLeft.getHeight()==1) {
+			rotations.rotateRight((nextRootPreviousParent));
+			demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
+			return deletion_rebalance(nextRootPreviousParent.getParent())+1;
+		}
+
 	}
 
+
 }
+
+	private void demoteAvlHeight(IAVLNode nextRootPreviousParent, int nextRootPreviousParentHeight) {
+		nextRootPreviousParent.setHeight(nextRootPreviousParentHeight - 1);
+	}
+
 	/**
 	 * public String min()
 	 * <p>
@@ -525,7 +545,7 @@ protected int deletion_rebalance(IAVLNode nextRootPreviousParent)
 		}
 
 		public int demote() {
-			setHeight(getHeight() - 1);
+			demoteAvlHeight(AVLNode.this, getHeight());
 			return 1;
 		}
 	}
