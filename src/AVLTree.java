@@ -157,15 +157,15 @@ public class AVLTree {
 
 	protected int DeleteAndPlaceSuccesor(IAVLNode deletedRoot, IAVLNode parentOfDeletedRoot, Optional<IAVLNode> optionalnextRoot) {
 		final IAVLNode nextRoot = optionalnextRoot.get();
-		final IAVLNode nextCurrentRootParent = nextRoot.getParent();
-		final IAVLNode nextCurrentRootLeftChild = nextRoot.getLeft();
+		final IAVLNode nextRootParent = nextRoot.getParent();
+		final IAVLNode nextRootLeftChild = nextRoot.getLeft();
 
-		//new son to the parent
-		nextCurrentRootParent.setLeft(nextCurrentRootLeftChild);
+		//new son to the abandoned  parent
+		nextRootParent.setRight(nextRootLeftChild);
 
 		updateNextRootProps(deletedRoot, parentOfDeletedRoot, nextRoot);
 
-		return deletion_rebalance(nextCurrentRootParent);
+		return deletion_rebalance(nextRootParent);
 	}
 
 	private void updateNextRootProps(IAVLNode deletedRoot, IAVLNode parentOfDeletedRoot, IAVLNode nextRoot) {
@@ -179,7 +179,7 @@ public class AVLTree {
 
 		if (isRootLeftChild) {
 			parentOfDeletedRoot.setLeft(deletedRootLeftChild);
-		} else {
+		} else if(parentOfDeletedRoot!=null) {
 			parentOfDeletedRoot.setRight(deletedRootLeftChild);
 		}
 		deletedRootLeftChild.setParent(parentOfDeletedRoot);
@@ -199,6 +199,8 @@ public class AVLTree {
 	}
 
 	protected static Optional<IAVLNode> findPlace(int key, IAVLNode currentNode) {
+		if(currentNode==null)
+			return Optional.empty();
 		if (!currentNode.isRealNode())
 			return Optional.empty();
 		final int currentNodeKey = currentNode.getKey();
@@ -284,7 +286,7 @@ public class AVLTree {
 			}
 		}
 
-
+throw new RuntimeException("shouldn't have reached here");
 	}
 
 	private void demoteAvlHeight(IAVLNode nextRootPreviousParent, int nextRootPreviousParentHeight) {
@@ -292,7 +294,7 @@ public class AVLTree {
 	}
 
 	private void promoteAvlHeight(IAVLNode nextRootPreviousParent, int nextRootPreviousParentHeight) {
-		nextRootPreviousParent.setHeight(nextRootPreviousParentHeight + 1 1);
+		nextRootPreviousParent.setHeight(nextRootPreviousParentHeight +  1);
 	}
 
 	/**
@@ -496,6 +498,11 @@ public class AVLTree {
 	 * (It must implement IAVLNode)
 	 */
 	public class AVLNode implements IAVLNode {
+		@Override
+		public String toString() {
+			return key+" "+value;
+		}
+
 		private int key;
 		private String value;
 		private IAVLNode left;
