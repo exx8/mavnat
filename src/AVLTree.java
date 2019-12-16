@@ -226,7 +226,11 @@ protected int deletion_rebalance(IAVLNode nextRootPreviousParent)
 	final int rightToParentHeightGap = nextRootPreviousParentRight.getHeight() - nextRootPreviousParentHeight;
 
 	final boolean gapBetweenLeftAndRootIs2 = leftToParentHeightGap == 2;
-	if(bothChildrenHaveSameHeight && gapBetweenLeftAndRootIs2) {
+	if(bothChildrenHaveSameHeight&&leftToParentHeightGap==1)
+		return 0; //everything fine do nothing
+	else if((leftToParentHeightGap==2&&rightToParentHeightGap==1)&&(leftToParentHeightGap==1&&rightToParentHeightGap==2))
+		return 0; //everything fine do nothing
+	else if(bothChildrenHaveSameHeight && gapBetweenLeftAndRootIs2) {
 		//case 1
 		demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
 		return deletion_rebalance(nextRootPreviousParent.getParent())+1;
@@ -251,6 +255,7 @@ protected int deletion_rebalance(IAVLNode nextRootPreviousParent)
 		}
 
 	}
+
 
 
 }
