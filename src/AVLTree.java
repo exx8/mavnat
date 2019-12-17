@@ -185,11 +185,11 @@ public class AVLTree {
 			} else {
 				parent.setLeft(successor);
 			}
-			successor.setParent(parent);
 		} else {
 			//the root node was deleted
 			root = successor;
 		}
+		successor.setParent(parent);
 
 		return successorParent;
 	}
@@ -209,11 +209,11 @@ public class AVLTree {
 			} else {
 				parent.setLeft(replacementNode);
 			}
-			replacementNode.setParent(parent);
 		} else {
 			//the root node was deleted
 			root = replacementNode.isRealNode() ? replacementNode : null;
 		}
+		replacementNode.setParent(parent);
 	}
 
 	protected Optional<IAVLNode> findPlace(int key) {
@@ -550,6 +550,7 @@ public class AVLTree {
 			this.realNode = realNode;
 			if (!realNode) {
 				height = -1;
+				this.key = -1;
 			}
 		}
 
