@@ -199,7 +199,6 @@ public class AVLTree {
 	 * precondition: none
 	 * postcondition: none
 	 */
-	enum direction{right,left}
 
 	public IAVLNode getRoot() {
 		return root;
@@ -230,34 +229,27 @@ public class AVLTree {
 		// travel till we get the root, while adding to lists left and right sons.
 		join(node.getRight(),greaterTree);
 		join(node.getLeft(),smallerTree);
-		direction whereIcameFrom;
-
-		//find where I come from for first iteration
-		if(node.getParent().getKey()>node.getKey())
-			whereIcameFrom= direction.left;
-		else
-			whereIcameFrom=direction.right;
 
 		node=node.getParent();
+
 		while(node!=null)
 		{
-			//put the remaining branch to the tree
-			if(whereIcameFrom==direction.left)
-				join(node.getRight(), greaterTree);
-			else
-			join(node.getLeft(),smallerTree);
-			// decide where to put the parent
+			IAVLNode parent=node.getParent();
 			if(x>node.getKey())
+			{
+				join(node.getRight(),greaterTree);
+				node.setFakeRight();
+				node.setParent(null);
 				join(node,smallerTree);
+			}
 			else
+			{
+				join(node.getLeft(),smallerTree);
+				node.setFakeLeft();
+				node.setParent(null);
 				join(node,greaterTree);
-			//decide where I come from
-			if(node.getParent().getKey()>node.getKey())
-				whereIcameFrom= direction.left;
-			else
-				whereIcameFrom=direction.right;
-			//yay let's go where I need to go
-			node=node.getParent();
+			}
+			node=parent;
 		}
 
 
