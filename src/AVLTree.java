@@ -121,7 +121,14 @@ public class AVLTree {
 	public int insert(int k, String i) {
 		IAVLNode node = new AVLNode(k, i);
 
-		return insertNode(node);
+		final int number_of_rebalances = insertNode(node);
+		updatePointersOfMaxNMin();
+		return number_of_rebalances;
+	}
+
+	protected void updatePointersOfMaxNMin() {
+		updateMax();
+		updateMin();
 	}
 
 	/**
@@ -134,6 +141,8 @@ public class AVLTree {
 	 */
 	public int delete(int k) {
 		return 42;    // to be replaced by student code
+
+		//@todo add updatePointersOfMaxNMin()
 	}
 
 	/**
@@ -148,7 +157,7 @@ public class AVLTree {
 		return this.min_pointer.getValue();
 	}
 
-	protected void findMin() {
+	protected void updateMin() {
 		IAVLNode node = this.root;
 		if (empty())
 			min_pointer= null;
@@ -167,7 +176,7 @@ public class AVLTree {
 		return this.max_pointer.getValue();
 	}
 
-	protected void findMax() {
+	protected void updateMax() {
 		IAVLNode node = this.root;
 		if (empty())
 			max_pointer=null;
@@ -236,7 +245,7 @@ public class AVLTree {
 	public AVLTree[] split(int x) {
 		return null;
 	}
-
+//@todo add updatePointersOfMaxNMin to split
 	/**
 	 * public join(IAVLNode x, AVLTree t)
 	 * <p>
@@ -290,6 +299,7 @@ public class AVLTree {
 			balancer.rebalanceInsertion(x);
 		}
 		treeSize = newSize;
+		updatePointersOfMaxNMin();
 		return complexity;
 	}
 
