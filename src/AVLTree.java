@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.LinkedList;
 
 /**
  * AVLTree
@@ -211,7 +212,36 @@ public class AVLTree {
 	 * postcondition: none
 	 */
 	public AVLTree[] split(int x) {
-		return null;
+
+		LinkedList<IAVLNode> greaterList=new LinkedList<IAVLNode>(),smallerList=new LinkedList<IAVLNode>();
+		IAVLNode node=this.root;
+
+		//find node we look to split
+		while(node.getKey()!=x)
+		if(node.getKey()<x)
+			node=node.getRight();
+		else
+			node=node.getLeft();
+
+		// travel till we get the root, while adding to lists left and right sons.
+		while(node!=null)
+		{
+			greaterList.add(node.getRight());
+			smallerList.add(node.getLeft());
+
+			node=node.getParent();
+		}
+		//populating the trees
+		AVLTree GreaterTree=new AVLTree();
+		AVLTree samallerTree=new AVLTree();
+		for(IAVLNode nodeOfGreaterList:greaterList)
+			join(nodeOfGreaterList,GreaterTree);
+
+		for(IAVLNode nodeOfSmallerList:smallerList)
+			join(nodeOfSmallerList,GreaterTree);
+
+		return new AVLTree[]{samallerTree,GreaterTree};
+
 	}
 
 	/**
