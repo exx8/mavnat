@@ -8,10 +8,13 @@ import java.util.Arrays;
  */
 
 public class AVLTree {
+
 	protected IAVLNode root;
 	protected int treeSize = 0;
 	private Rotations rotations = new Rotations();
 	private Balancer balancer = new Balancer();
+	private IAVLNode max_pointer = null;
+	private IAVLNode min_pointer = null;
 
 	//region private methods
 
@@ -142,12 +145,16 @@ public class AVLTree {
 	public String min() {
 
 
-		IAVLNode node=this.root;
-		if(empty())
-			return null;
-		while(node.getLeft().isRealNode())
-			node=node.getLeft();
-		return node.getValue();
+		return this.min_pointer.getValue();
+	}
+
+	protected void findMin() {
+		IAVLNode node = this.root;
+		if (empty())
+			min_pointer= null;
+		while (node.getLeft().isRealNode())
+			node = node.getLeft();
+		min_pointer=node;
 	}
 
 	/**
@@ -157,12 +164,16 @@ public class AVLTree {
 	 * or null if the tree is empty
 	 */
 	public String max() {
-		IAVLNode node=this.root;
-		if(empty())
-			return null;
-		while(node.getRight().isRealNode())
-			node=node.getRight();
-		return node.getValue();
+		return this.max_pointer.getValue();
+	}
+
+	protected void findMax() {
+		IAVLNode node = this.root;
+		if (empty())
+			max_pointer=null;
+		while (node.getRight().isRealNode())
+			node = node.getRight();
+		this.max_pointer = node;
 	}
 
 	/**
