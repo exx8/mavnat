@@ -87,6 +87,20 @@ public class AVLTree {
 		return 0;
 	}
 
+	/**
+	 * Find the successor of a node with a right child
+	 *
+	 * @param node AVL node
+	 * @return the successor
+	 */
+	private IAVLNode findChildSuccessor(IAVLNode node) {
+		IAVLNode successor = node.getRight();
+		while (successor.getLeft().isRealNode()) {
+			successor = successor.getLeft();
+		}
+		return successor;
+	}
+
 	//endregion
 
 	/**
@@ -131,69 +145,75 @@ public class AVLTree {
 	 * returns -1 if an item with key k was not found in the tree.
 	 */
 	public int delete(int k) {
-
-		//no min get -1
-		final Optional<IAVLNode> place2Delete = findPlace(k);
-		if (!place2Delete.isPresent())
+		final Optional<IAVLNode> placeToDelete = findPlace(k);
+		//return -1 if the key was not found
+		if (!placeToDelete.isPresent())
 			return -1;
 
-		//some inits
-		final IAVLNode deletedRoot = place2Delete.get();
-		final IAVLNode parentOfDeletedRoot = deletedRoot.getParent();
-		final boolean isRoot = parentOfDeletedRoot == null;
-		final boolean isRootLeftChild = !isRoot && (deletedRoot.getKey() < parentOfDeletedRoot.getKey());
-		final IAVLNode rightChild = deletedRoot.getRight();
-		final Optional<IAVLNode> optionalnextRoot = findMin(rightChild);
+		final IAVLNode deletedNode = placeToDelete.get();
+		final boolean hasTwoChildren = deletedNode.getLeft().isRealNode() && deletedNode.getRight().isRealNode();
 
-		//real logic
-		if (!optionalnextRoot.isPresent()) {
-			return handleDeleteWithNoSuccesor(deletedRoot, parentOfDeletedRoot, isRootLeftChild);
+		if (!hasTwoChildren) {
+			deleteDirectly(deletedNode);
 		} else {
-			return DeleteAndPlaceSuccesor(deletedRoot, parentOfDeletedRoot, optionalnextRoot);
+			deleteSuccessor(deletedNode);
+		}
+		treeSize--;
+		return 0;
+	}
+
+	/**
+	 * Delete a node by replacing it with its successor and deleting the successor instead
+	 *
+	 * @param node
+	 * @return the parent of the successor
+	 */
+	private IAVLNode deleteSuccessor(IAVLNode node) {
+		IAVLNode successor = findChildSuccessor(node);
+		IAVLNode successorParent = successor.getParent();
+		//delete the successor
+		deleteDirectly(successor);
+		//replace node with its successor
+		successor.setLeft(node.getLeft());
+		node.getLeft().setParent(successor);
+		successor.setRight(node.getRight());
+		node.getRight().setParent(successor);
+		IAVLNode parent = node.getParent();
+		if (parent != null) {
+			if (parent.getRight() == node) {
+				parent.setRight(successor);
+			} else {
+				parent.setLeft(successor);
+			}
+			successor.setParent(parent);
+		} else {
+			//the root node was deleted
+			root = successor;
 		}
 
-
+		return successorParent;
 	}
 
-	protected int DeleteAndPlaceSuccesor(IAVLNode deletedRoot, IAVLNode parentOfDeletedRoot, Optional<IAVLNode> optionalnextRoot) {
-		final IAVLNode nextRoot = optionalnextRoot.get();
-		final IAVLNode nextRootParent = nextRoot.getParent();
-		final IAVLNode nextRootLeftChild = nextRoot.getLeft();
-
-		//new son to the abandoned  parent
-		if(parentOfDeletedRoot!=null)
-		parentOfDeletedRoot.setRight(nextRootLeftChild);
-		else
-			this.root=nextRoot;
-		updateNextRootProps(deletedRoot, parentOfDeletedRoot, nextRoot);
-
-		return deletion_rebalance(nextRootParent);
-	}
-
-	private void updateNextRootProps(IAVLNode deletedRoot, IAVLNode parentOfDeletedRoot, IAVLNode nextRoot) {
-		nextRoot.setParent(parentOfDeletedRoot);
-		nextRoot.setLeft(deletedRoot.getLeft());
-		nextRoot.setRight(deletedRoot.getRight());
-	}
-
-	protected int handleDeleteWithNoSuccesor(IAVLNode deletedRoot, IAVLNode parentOfDeletedRoot, boolean isRootLeftChild) {
-		final IAVLNode deletedRootLeftChild = deletedRoot.getLeft();
-
-		if (isRootLeftChild) {
-			parentOfDeletedRoot.setLeft(deletedRootLeftChild);
-		} else if(parentOfDeletedRoot!=null) {
-			parentOfDeletedRoot.setRight(deletedRootLeftChild);
+	/**
+	 * Delete a node with one or zero children
+	 *
+	 * @param node
+	 */
+	private void deleteDirectly(IAVLNode node) {
+		//the child to connect to the deleted node's parent
+		IAVLNode replacementNode = node.getLeft().isRealNode() ? node.getLeft() : node.getRight();
+		IAVLNode parent = node.getParent();
+		if (parent != null) {
+			if (parent.getRight() == node) {
+				parent.setRight(replacementNode);
+			} else {
+				parent.setLeft(replacementNode);
+			}
+			replacementNode.setParent(parent);
+		} else {
+			//the root node was deleted
+			root = replacementNode.isRealNode() ? replacementNode : null;
 		}
-		deletedRootLeftChild.setParent(parentOfDeletedRoot);
-		return deletion_rebalance(parentOfDeletedRoot);
-	}
-
-	protected static Optional<IAVLNode> findMin(IAVLNode node) {
-		if (!node.isRealNode())
-			return Optional.empty();
-		if (!node.getLeft().isRealNode())
-			return Optional.of(node);
-		return findMin(node.getLeft());
 	}
 
 	protected Optional<IAVLNode> findPlace(int key) {
@@ -201,7 +221,7 @@ public class AVLTree {
 	}
 
 	protected static Optional<IAVLNode> findPlace(int key, IAVLNode currentNode) {
-		if(currentNode==null)
+		if (currentNode == null)
 			return Optional.empty();
 		if (!currentNode.isRealNode())
 			return Optional.empty();
@@ -209,121 +229,100 @@ public class AVLTree {
 		if (currentNodeKey == key)
 			return Optional.of(currentNode);
 		else if (currentNodeKey > key)
-
 			return findPlace(key, currentNode.getLeft());
-
 		else
 			return findPlace(key, currentNode.getRight());
 
 	}
 
-	protected int deletion_rebalance(IAVLNode nextRootPreviousParent) {
-		if (nextRootPreviousParent == null)
+	protected int deletionRebalance(IAVLNode node) {
+		if (node == null)
 			return 0;
-		if(!nextRootPreviousParent.isRealNode())
+		if (!node.isRealNode())
 			return 0;
-		final IAVLNode nextRootPreviousParentRight = nextRootPreviousParent.getRight();
-		final IAVLNode nextRootPreviousParentLeft = nextRootPreviousParent.getLeft();
+		IAVLNode nextRootPreviousParentRight = node.getRight();
+		IAVLNode nextRootPreviousParentLeft = node.getLeft();
 
-		final boolean bothChildrenHaveSameHeight = nextRootPreviousParentRight.getHeight() == nextRootPreviousParent.getLeft().getHeight();
-		final int nextRootPreviousParentHeight = nextRootPreviousParent.getHeight();
-		final int leftToParentHeightGap = nextRootPreviousParentHeight-nextRootPreviousParent.getLeft().getHeight() ;
-		final int rightToParentHeightGap = nextRootPreviousParentHeight-nextRootPreviousParentRight.getHeight() ;
+		boolean bothChildrenHaveSameHeight = nextRootPreviousParentRight.getHeight() == node.getLeft().getHeight();
+		int nextRootPreviousParentHeight = node.getHeight();
+		int leftToParentHeightGap = nextRootPreviousParentHeight - node.getLeft().getHeight();
+		int rightToParentHeightGap = nextRootPreviousParentHeight - nextRootPreviousParentRight.getHeight();
 
-		final boolean gapBetweenLeftAndRootIs2 = leftToParentHeightGap == 2;
+		boolean gapBetweenLeftAndRootIs2 = leftToParentHeightGap == 2;
 		if (bothChildrenHaveSameHeight && leftToParentHeightGap == 1)
 			return 0; //everything fine do nothing
-		else if ((leftToParentHeightGap == 2 && rightToParentHeightGap == 1) ||(leftToParentHeightGap == 1 && rightToParentHeightGap == 2))
+		else if ((leftToParentHeightGap == 2 && rightToParentHeightGap == 1) || (leftToParentHeightGap == 1 && rightToParentHeightGap == 2))
 			return 0; //everything fine do nothing
 		else if (bothChildrenHaveSameHeight && gapBetweenLeftAndRootIs2) {
 			//case 1
-			demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
-			return deletion_rebalance(nextRootPreviousParent.getParent()) ;
+			node.demote();
+			return deletionRebalance(node.getParent());
 
-		}
-		else if(nextRootPreviousParentLeft.getRight()==null)
-		{
+		} else if (nextRootPreviousParentLeft.getRight() == null) {
 			rotations.rotateRight(nextRootPreviousParentLeft);
-			return deletion_rebalance(nextRootPreviousParentLeft)+1;
-		}
-		else if(nextRootPreviousParentLeft.getLeft()==null)
-		{
+			return deletionRebalance(nextRootPreviousParentLeft) + 1;
+		} else if (nextRootPreviousParentLeft.getLeft() == null) {
 			rotations.rotateLeft(nextRootPreviousParentLeft);
-			return deletion_rebalance(nextRootPreviousParentLeft)+1;
-		}
-		else if(nextRootPreviousParentRight.getRight()==null)
-		{
+			return deletionRebalance(nextRootPreviousParentLeft) + 1;
+		} else if (nextRootPreviousParentRight.getRight() == null) {
 
 			rotations.rotateRight(nextRootPreviousParentLeft);
-			return deletion_rebalance(nextRootPreviousParentLeft)+1;
-		}
-		else if(nextRootPreviousParentRight.getLeft()==null)
-		{
+			return deletionRebalance(nextRootPreviousParentLeft) + 1;
+		} else if (nextRootPreviousParentRight.getLeft() == null) {
 			rotations.rotateLeft(nextRootPreviousParentLeft);
-			return deletion_rebalance(nextRootPreviousParentLeft)+1;
-		}
-
-		else if (rightToParentHeightGap == 3 && leftToParentHeightGap == 1) {
+			return deletionRebalance(nextRootPreviousParentLeft) + 1;
+		} else if (rightToParentHeightGap == 3 && leftToParentHeightGap == 1) {
 			//case 2 left
 			if (nextRootPreviousParentRight.getRight().getHeight() - nextRootPreviousParentRight.getHeight() == 1 && nextRootPreviousParentRight.getLeft().getHeight() - nextRootPreviousParentRight.getHeight() == 1) {
-				rotations.rotateLeft((nextRootPreviousParent));
-				demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
-				promoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
+				rotations.rotateLeft((node));
+				node.demote();
+				node.promote();
 
-				return deletion_rebalance(nextRootPreviousParent.getParent()) + 1;
+				return deletionRebalance(node.getParent()) + 1;
 			}
 			//case 3 left
 			if (nextRootPreviousParentRight.getRight().getHeight() - nextRootPreviousParentRight.getHeight() == 1 && nextRootPreviousParentRight.getLeft().getHeight() - nextRootPreviousParentRight.getHeight() == 2) {
-				rotations.rotateLeft((nextRootPreviousParent));
-				demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
-				demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);//twice
+				rotations.rotateLeft((node));
+				node.demote();
+				node.demote();
 
-				return deletion_rebalance(nextRootPreviousParent.getParent()) + 1;
+				return deletionRebalance(node.getParent()) + 1;
 			}
 			//case 4 left
 			else if (nextRootPreviousParentRight.getLeft().getHeight() - nextRootPreviousParentRight.getHeight() == 1 && nextRootPreviousParentRight.getRight().getHeight() - nextRootPreviousParentRight.getHeight() == 2) {
-				rotations.rotateLeft((nextRootPreviousParent));
-				rotations.rotateLeft((nextRootPreviousParent));//twice
+				rotations.rotateLeft((node));
+				rotations.rotateLeft((node));//twice
 
-				return deletion_rebalance(nextRootPreviousParent.getParent()) + 2;
+				return deletionRebalance(node.getParent()) + 2;
 			}
 
 		} else if (rightToParentHeightGap == 1 && leftToParentHeightGap == 3) {
 			//case 2 right
 
-			 if (nextRootPreviousParentLeft.getRight().getHeight() - nextRootPreviousParentLeft.getHeight() == 1 && nextRootPreviousParentLeft.getLeft().getHeight() - nextRootPreviousParentLeft.getHeight() == 1) {
-				rotations.rotateRight((nextRootPreviousParent));
-				demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
-				promoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
+			if (nextRootPreviousParentLeft.getRight().getHeight() - nextRootPreviousParentLeft.getHeight() == 1 && nextRootPreviousParentLeft.getLeft().getHeight() - nextRootPreviousParentLeft.getHeight() == 1) {
+				rotations.rotateRight((node));
+				node.demote();
 
-				return deletion_rebalance(nextRootPreviousParent.getParent()) + 1;
+				return deletionRebalance(node.getParent()) + 1;
 			}
 			//case 3 right
 			if (nextRootPreviousParentLeft.getRight().getHeight() - nextRootPreviousParentLeft.getHeight() == 1 && nextRootPreviousParentLeft.getLeft().getHeight() - nextRootPreviousParentLeft.getHeight() == 2) {
-				rotations.rotateRight((nextRootPreviousParent));
-				demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);
-				demoteAvlHeight(nextRootPreviousParent, nextRootPreviousParentHeight);//twice
+				rotations.rotateRight((node));
+				node.demote();
+				node.demote();
 
-				return deletion_rebalance(nextRootPreviousParent.getParent()) + 1;
+				return deletionRebalance(node.getParent()) + 1;
 			}
 			//case 4 right
 			else if (nextRootPreviousParentLeft.getLeft().getHeight() - nextRootPreviousParentLeft.getHeight() == 1 && nextRootPreviousParentLeft.getRight().getHeight() - nextRootPreviousParentLeft.getHeight() == 2) {
-				rotations.rotateRight((nextRootPreviousParent));
-				rotations.rotateRight((nextRootPreviousParent));//twice
+				rotations.rotateRight((node));
+				rotations.rotateRight((node));//twice
 
-				return deletion_rebalance(nextRootPreviousParent.getParent()) + 2;
+				return deletionRebalance(node.getParent()) + 2;
 			}
 		}
 
-throw new RuntimeException("shouldn't have reached here");
-	}
-
-	private void demoteAvlHeight(IAVLNode nextRootPreviousParent, int nextRootPreviousParentHeight) {
-		nextRootPreviousParent.setHeight(nextRootPreviousParentHeight - 1);
-	}
-
-	private void promoteAvlHeight(IAVLNode nextRootPreviousParent, int nextRootPreviousParentHeight) {
-		nextRootPreviousParent.setHeight(nextRootPreviousParentHeight +  1);
+		throw new RuntimeException("shouldn't have reached here");
 	}
 
 	/**
@@ -529,7 +528,7 @@ throw new RuntimeException("shouldn't have reached here");
 	public class AVLNode implements IAVLNode {
 		@Override
 		public String toString() {
-			return key+" "+value;
+			return key + " " + value;
 		}
 
 		private int key;
@@ -617,7 +616,7 @@ throw new RuntimeException("shouldn't have reached here");
 		}
 
 		public int demote() {
-			demoteAvlHeight(AVLNode.this, getHeight());
+			setHeight(getHeight() - 1);
 			return 1;
 		}
 	}
@@ -718,8 +717,8 @@ throw new RuntimeException("shouldn't have reached here");
 		private void updateParents(IAVLNode parent, IAVLNode node, IAVLNode nodesChild) {
 			node.setParent(parent.getParent());
 			parent.setParent(node);
-			if(nodesChild!=null)
-			nodesChild.setParent(parent);
+			if (nodesChild != null)
+				nodesChild.setParent(parent);
 		}
 	}
 

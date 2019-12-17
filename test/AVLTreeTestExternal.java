@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
-class AVLTreeTest {
+class AVLTreeTestExternal {
 
 	private static int[] randomArray(int size, int min, int max)
 	{

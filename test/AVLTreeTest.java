@@ -2,7 +2,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class AVLTreeTest2 {
+class AVLTreeTest {
 
 	@Test
 	void keysToArrayTest() {
