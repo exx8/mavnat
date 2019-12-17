@@ -147,6 +147,7 @@ public class AVLTree {
 			return null;
 		while(node.getLeft().isRealNode())
 			node=node.getLeft();
+		return node.getValue();
 	}
 
 	/**
@@ -161,6 +162,7 @@ public class AVLTree {
 			return null;
 		while(node.getRight().isRealNode())
 			node=node.getRight();
+		return node.getValue();
 	}
 
 	/**
