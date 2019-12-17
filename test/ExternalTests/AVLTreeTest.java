@@ -96,6 +96,19 @@ class AVLTreeTest {
 		tree = arrayToTree(values);
 		List<Integer> valuesShuffled = Arrays.stream(values).boxed().collect(Collectors.toList());
 		Collections.shuffle(valuesShuffled);
+		TreePrinter.print(tree);
+		for (int x : valuesShuffled)
+		{
+			System.out.format("deleting %d%n", tree.getRoot().getKey());
+			tree.delete(tree.getRoot().getKey());
+			TreePrinter.print(tree);
+			assertTrue(AVLSanitizer.sanitizeTree(tree));
+		}
+
+		values = randomArray(10, 0, 100);
+		tree = arrayToTree(values);
+		valuesShuffled = Arrays.stream(values).boxed().collect(Collectors.toList());
+		Collections.shuffle(valuesShuffled);
 		for (int x : valuesShuffled)
 		{
 			System.out.format("deleting %d%n", x);
