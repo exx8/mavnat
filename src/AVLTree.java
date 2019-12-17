@@ -140,7 +140,13 @@ public class AVLTree {
 	 * or null if the tree is empty
 	 */
 	public String min() {
-		return "42"; // to be replaced by student code
+
+
+		IAVLNode node=this.root;
+		if(empty())
+			return null;
+		while(node.getLeft().isRealNode())
+			node=node.getLeft();
 	}
 
 	/**
@@ -150,7 +156,11 @@ public class AVLTree {
 	 * or null if the tree is empty
 	 */
 	public String max() {
-		return "42"; // to be replaced by student code
+		IAVLNode node=this.root;
+		if(empty())
+			return null;
+		while(node.getRight().isRealNode())
+			node=node.getRight();
 	}
 
 	/**
