@@ -199,6 +199,8 @@ public class AVLTree {
 	 * precondition: none
 	 * postcondition: none
 	 */
+	enum direction{right,left}
+
 	public IAVLNode getRoot() {
 		return root;
 	}
@@ -212,8 +214,9 @@ public class AVLTree {
 	 * postcondition: none
 	 */
 	public AVLTree[] split(int x) {
+		AVLTree greaterTree=new AVLTree();
+		AVLTree smallerTree=new AVLTree();
 
-		LinkedList<IAVLNode> greaterList=new LinkedList<IAVLNode>(),smallerList=new LinkedList<IAVLNode>();
 		IAVLNode node=this.root;
 
 		//find node we look to split
@@ -223,24 +226,43 @@ public class AVLTree {
 		else
 			node=node.getLeft();
 
+
 		// travel till we get the root, while adding to lists left and right sons.
+		join(node.getRight(),greaterTree);
+		join(node.getLeft(),smallerTree);
+		direction whereIcameFrom;
+
+		//find where I come from for first iteration
+		if(node.getParent().getKey()>node.getKey())
+			whereIcameFrom= direction.left;
+		else
+			whereIcameFrom=direction.right;
+
+		node=node.getParent();
 		while(node!=null)
 		{
-			greaterList.add(node.getRight());
-			smallerList.add(node.getLeft());
-
+			//put the remaining branch to the tree
+			if(whereIcameFrom==direction.left)
+				join(node.getRight(), greaterTree);
+			else
+			join(node.getLeft(),smallerTree);
+			// decide where to put the parent
+			if(x>node.getKey())
+				join(node,smallerTree);
+			else
+				join(node,greaterTree);
+			//decide where I come from
+			if(node.getParent().getKey()>node.getKey())
+				whereIcameFrom= direction.left;
+			else
+				whereIcameFrom=direction.right;
+			//yay let's go where I need to go
 			node=node.getParent();
 		}
-		//populating the trees
-		AVLTree GreaterTree=new AVLTree();
-		AVLTree samallerTree=new AVLTree();
-		for(IAVLNode nodeOfGreaterList:greaterList)
-			join(nodeOfGreaterList,GreaterTree);
 
-		for(IAVLNode nodeOfSmallerList:smallerList)
-			join(nodeOfSmallerList,GreaterTree);
 
-		return new AVLTree[]{samallerTree,GreaterTree};
+
+		return new AVLTree[]{smallerTree,greaterTree};
 
 	}
 
