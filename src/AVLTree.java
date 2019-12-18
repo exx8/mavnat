@@ -410,7 +410,6 @@ public class AVLTree {
 		return new AVLTree[]{smallerTree,greaterTree};
 
 	}
-//@todo add updatePointersOfMaxNMin to split
 	/**
 	 * public join(IAVLNode x, AVLTree t)
 	 * <p>
