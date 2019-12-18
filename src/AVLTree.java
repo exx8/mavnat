@@ -108,7 +108,7 @@ public class AVLTree {
 		while(node.isRealNode())
 			if(node.getKey()==k)
 				return node.getValue();
-			else if(node.getKey()<k)
+			else if(node.getKey()>k)
 				node=node.getLeft();
 			else
 				node=node.getRight();
