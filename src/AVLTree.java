@@ -254,6 +254,7 @@ public class AVLTree {
 		}
 		treeSize--;
 		int amount = deletionBalancer.rebalance(deletedNodeParent);
+		updatePointersOfMaxNMin();
 		return amount;
 	}
 
