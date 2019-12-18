@@ -765,7 +765,7 @@ public class AVLTree {
 		 * @param node the parent of the deleted node
 		 * @return the number of rebalances that occurred
 		 */
-		protected int rebalance(IAVLNode node) {
+		public int rebalance(IAVLNode node) {
 			if (node == null) {
 				return 0;
 			}
@@ -782,8 +782,7 @@ public class AVLTree {
 				amount = 0;
 			} else if (leftDif == 2 && rightDif == 2) {
 				//case 1: demote and rebalance parent
-				amount += node.demote();
-				amount += rebalance(node.getParent());
+				amount += handleDeletionCase1(node);
 			} else if ((rightDif == 3 && leftDif == 1) || (rightDif == 1 && leftDif == 3)) {
 				//decides the side of the symmetric cases
 				boolean leftDifLarger = leftDif == 3;
@@ -796,35 +795,13 @@ public class AVLTree {
 
 				if (grandchildDifA == 1 && grandchildDifB == 1) {
 					//case 2: single rotation
-					if (leftDifLarger) {
-						amount += rotations.rotateLeft(grandchildrenParent);
-					} else {
-						amount += rotations.rotateRight(grandchildrenParent);
-					}
-					amount += node.demote();
-					amount += grandchildrenParent.promote();
+					amount += handleDeletionCase2(leftDifLarger, node, grandchildrenParent);
 				} else if (grandchildDifA == 2 && grandchildDifB == 1) {
 					//case 3: single rotation and rebalance parent
-					if (leftDifLarger) {
-						amount += rotations.rotateLeft(grandchildrenParent);
-					} else {
-						amount += rotations.rotateRight(grandchildrenParent);
-					}
-					amount += node.demote();
-					amount += node.demote();
-					amount += rebalance(grandchildrenParent.getParent());
+					amount += handleDeletionCase3(leftDifLarger, node, grandchildrenParent);
 				} else if (grandchildDifA == 1 && grandchildDifB == 2) {
 					//case 4: double rotation and rebalance parent
-					if (leftDifLarger) {
-						amount += rotations.rotateRightNLeft(grandchildA);
-					} else {
-						amount += rotations.rotateLeftNRight(grandchildA);
-					}
-					amount += node.demote();
-					amount += node.demote();
-					amount += grandchildrenParent.demote();
-					amount += grandchildA.promote();
-					amount += rebalance(grandchildA.getParent());
+					amount += handleDeletionCase4(leftDifLarger, node, grandchildrenParent, grandchildA);
 				} else {
 					throw new IllegalStateException("Unsupported rebalance state");
 				}
@@ -834,7 +811,85 @@ public class AVLTree {
 
 			return amount;
 		}
+
+		/**
+		 * Handle case 1 of deletion, which requires demotion and more rebalancing
+		 *
+		 * @param node the rebalanced node
+		 * @return time complexity
+		 */
+		private int handleDeletionCase1(IAVLNode node) {
+			int amount = 0;
+			amount += node.demote();
+			amount += rebalance(node.getParent());
+			return amount;
+		}
+
+		/**
+		 * Handle case 2 of deletion, which requires rotation
+		 *
+		 * @param leftDifLarger       is the left height difference larger (decides the symmetric case side)
+		 * @param node                the rebalanced node
+		 * @param grandchildrenParent the node's child with grandchildren to rebalance
+		 * @return time complexity
+		 */
+		private int handleDeletionCase2(boolean leftDifLarger, IAVLNode node, IAVLNode grandchildrenParent) {
+			int amount = 0;
+			if (leftDifLarger) {
+				amount += rotations.rotateLeft(grandchildrenParent);
+			} else {
+				amount += rotations.rotateRight(grandchildrenParent);
+			}
+			amount += node.demote();
+			amount += grandchildrenParent.promote();
+			return amount;
+		}
+
+		/**
+		 * Handle case 3 of deletion, which requires rotation and more rebalancing
+		 *
+		 * @param leftDifLarger       is the left height difference larger (decides the symmetric case side)
+		 * @param node                the rebalanced node
+		 * @param grandchildrenParent the node's child with grandchildren to rebalance
+		 * @return time complexity
+		 */
+		private int handleDeletionCase3(boolean leftDifLarger, IAVLNode node, IAVLNode grandchildrenParent) {
+			int amount = 0;
+			if (leftDifLarger) {
+				amount += rotations.rotateLeft(grandchildrenParent);
+			} else {
+				amount += rotations.rotateRight(grandchildrenParent);
+			}
+			amount += node.demote();
+			amount += node.demote();
+			amount += rebalance(grandchildrenParent.getParent());
+			return amount;
+		}
+
+		/**
+		 * Handle case 4 of deletion, which requires double rotation and more rebalancing
+		 *
+		 * @param leftDifLarger       is the left height difference larger (decides the symmetric case side)
+		 * @param node                the rebalanced node
+		 * @param grandchildrenParent the node's child with grandchildren to rebalance
+		 * @param grandchild          the grandchild to rotate
+		 * @return time complexity
+		 */
+		private int handleDeletionCase4(boolean leftDifLarger, IAVLNode node, IAVLNode grandchildrenParent, IAVLNode grandchild) {
+			int amount = 0;
+			if (leftDifLarger) {
+				amount += rotations.rotateRightNLeft(grandchild);
+			} else {
+				amount += rotations.rotateLeftNRight(grandchild);
+			}
+			amount += node.demote();
+			amount += node.demote();
+			amount += grandchildrenParent.demote();
+			amount += grandchild.promote();
+			amount += rebalance(grandchild.getParent());
+			return amount;
+		}
 	}
 }
-  
+
 
