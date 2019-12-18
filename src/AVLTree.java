@@ -372,16 +372,17 @@ public class AVLTree {
 		IAVLNode node = this.root;
 
 		//find node we look to split
-		while (node.getKey() != x)
+		while (node.getKey() != x) {
 			if (node.getKey() < x)
 				node = node.getRight();
 			else
 				node = node.getLeft();
-
-
+		}
+		greaterTree.root=node.getRight();
+		node.getRight().setParent(null);
 		// travel till we get the root, while adding to lists left and right sons.
-		join(node.getRight(), greaterTree);
-		join(node.getLeft(), smallerTree);
+		smallerTree.root=node.getLeft();
+		node.getLeft().setParent(null);
 
 		node = node.getParent();
 
@@ -390,11 +391,17 @@ public class AVLTree {
 			if (x > node.getKey()) {
 				node.setFakeRight();
 				node.setParent(null);
-				join(node, smallerTree);
+				node.getLeft().setParent(null);
+				AVLTree tree=new AVLTree();
+				tree.root=node.getLeft();
+				smallerTree.join(node, tree);
 			} else {
 				node.setFakeLeft();
 				node.setParent(null);
-				join(node, greaterTree);
+				node.getRight().setParent(null);
+				AVLTree tree=new AVLTree();
+				tree.root=node.getRight();
+				greaterTree.join(node, tree);
 			}
 			node = parent;
 		}
