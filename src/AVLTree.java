@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * AVLTree
@@ -11,7 +12,8 @@ public class AVLTree {
 	protected IAVLNode root;
 	protected int treeSize = 0;
 	private Rotations rotations = new Rotations();
-	private Balancer balancer = new Balancer();
+	private InsertionBalancer insertionBalancer = new InsertionBalancer();
+	private DeletionBalancer deletionBalancer = new DeletionBalancer();
 
 	//region private methods
 
@@ -69,7 +71,7 @@ public class AVLTree {
 				currNode.getParent().setRight(node);
 			}
 			node.setParent(currNode.getParent());
-			rebalances = balancer.rebalanceInsertion(node);
+			rebalances = insertionBalancer.rebalance(node);
 		}
 		treeSize++;
 		return rebalances;
@@ -84,6 +86,99 @@ public class AVLTree {
 			return amount;
 		}
 		return 0;
+	}
+
+	/**
+	 * Find the successor of a node with a right child
+	 *
+	 * @param node AVL node
+	 * @return the successor
+	 */
+	private IAVLNode findChildSuccessor(IAVLNode node) {
+		IAVLNode successor = node.getRight();
+		while (successor.getLeft().isRealNode()) {
+			successor = successor.getLeft();
+		}
+		return successor;
+	}
+
+	/**
+	 * Delete a node by replacing it with its successor and deleting the successor instead
+	 *
+	 * @param node
+	 * @return the parent of the successor
+	 */
+	private IAVLNode deleteSuccessor(IAVLNode node) {
+		IAVLNode successor = findChildSuccessor(node);
+		IAVLNode successorParent = successor.getParent();
+		if (successorParent == node) {
+			//if the successor is the direct child of node, it will be similar to direct deletion
+			successorParent = successor;
+		}
+		//delete the successor
+		deleteDirectly(successor);
+		//replace node with its successor
+		successor.setLeft(node.getLeft());
+		node.getLeft().setParent(successor);
+		successor.setRight(node.getRight());
+		node.getRight().setParent(successor);
+		successor.setHeight(node.getHeight());
+
+		IAVLNode parent = node.getParent();
+		if (parent != null) {
+			if (parent.getRight() == node) {
+				parent.setRight(successor);
+			} else {
+				parent.setLeft(successor);
+			}
+		} else {
+			//the root node was deleted
+			root = successor;
+		}
+		successor.setParent(parent);
+
+		return successorParent;
+	}
+
+	/**
+	 * Delete a node with one or zero children
+	 *
+	 * @param node
+	 */
+	private void deleteDirectly(IAVLNode node) {
+		//the child to connect to the deleted node's parent
+		IAVLNode replacementNode = node.getLeft().isRealNode() ? node.getLeft() : node.getRight();
+		IAVLNode parent = node.getParent();
+		if (parent != null) {
+			if (parent.getRight() == node) {
+				parent.setRight(replacementNode);
+			} else {
+				parent.setLeft(replacementNode);
+			}
+		} else {
+			//the root node was deleted
+			root = replacementNode.isRealNode() ? replacementNode : null;
+		}
+		replacementNode.setParent(parent);
+	}
+
+	protected Optional<IAVLNode> findPlace(int key) {
+		return findPlace(key, this.root);
+	}
+
+	protected static Optional<IAVLNode> findPlace(int key, IAVLNode currentNode) {
+		if (currentNode == null)
+			return Optional.empty();
+		if (!currentNode.isRealNode())
+			return Optional.empty();
+		final int currentNodeKey = currentNode.getKey();
+		if (currentNodeKey == key)
+			return Optional.of(currentNode);
+		else if (currentNodeKey > key)
+			return findPlace(key, currentNode.getLeft());
+		else
+			return findPlace(key, currentNode.getRight());
+
 	}
 
 	//endregion
@@ -130,7 +225,26 @@ public class AVLTree {
 	 * returns -1 if an item with key k was not found in the tree.
 	 */
 	public int delete(int k) {
-		return 42;    // to be replaced by student code
+		final Optional<IAVLNode> placeToDelete = findPlace(k);
+		//return -1 if the key was not found
+		if (!placeToDelete.isPresent())
+			return -1;
+
+		final IAVLNode deletedNode = placeToDelete.get();
+		final boolean hasTwoChildren = deletedNode.getLeft().isRealNode() && deletedNode.getRight().isRealNode();
+
+		//the parent of the node that was actually deleted
+		//in the case of deletion of a successor, it will be the successor's parent
+		IAVLNode deletedNodeParent;
+		if (!hasTwoChildren) {
+			deletedNodeParent = deletedNode.getParent();
+			deleteDirectly(deletedNode);
+		} else {
+			deletedNodeParent = deleteSuccessor(deletedNode);
+		}
+		treeSize--;
+		int amount = deletionBalancer.rebalance(deletedNodeParent);
+		return amount;
 	}
 
 	/**
@@ -264,7 +378,7 @@ public class AVLTree {
 				//if this tree's height is smaller than t's height, its root should change to be t's root
 				root = largerTree.root;
 			}
-			balancer.rebalanceInsertion(x);
+			insertionBalancer.rebalance(x);
 		}
 		treeSize = newSize;
 		return complexity;
@@ -334,6 +448,11 @@ public class AVLTree {
 	 * (It must implement IAVLNode)
 	 */
 	public class AVLNode implements IAVLNode {
+		@Override
+		public String toString() {
+			return key + " " + value;
+		}
+
 		private int key;
 		private String value;
 		private IAVLNode left;
@@ -353,6 +472,7 @@ public class AVLTree {
 			this.realNode = realNode;
 			if (!realNode) {
 				height = -1;
+				this.key = -1;
 			}
 		}
 
@@ -520,18 +640,19 @@ public class AVLTree {
 		private void updateParents(IAVLNode parent, IAVLNode node, IAVLNode nodesChild) {
 			node.setParent(parent.getParent());
 			parent.setParent(node);
-			nodesChild.setParent(parent);
+			if (nodesChild != null)
+				nodesChild.setParent(parent);
 		}
 	}
 
-	class Balancer {
+	class InsertionBalancer {
 		/**
 		 * Rebalances a node after insertion to the tree.
 		 *
 		 * @param node the node to rebalance
 		 * @return the number of rebalances that occurred
 		 */
-		public int rebalanceInsertion(IAVLNode node) {
+		public int rebalance(IAVLNode node) {
 			int amount = 0;
 			IAVLNode parent = node.getParent();
 			if (parent != null) {
@@ -574,7 +695,7 @@ public class AVLTree {
 		private int handleInsertionCase1(IAVLNode parent) {
 			int amount = 0;
 			amount += parent.promote();
-			amount += rebalanceInsertion(parent);
+			amount += rebalance(parent);
 			return amount;
 		}
 
@@ -602,7 +723,7 @@ public class AVLTree {
 				//this is a case that may happen in join where leftDif=rightDif=1
 				//after the rotation, it becomes case 1 and more rebalancing is needed
 				amount += node.promote();
-				amount += rebalanceInsertion(node);
+				amount += rebalance(node);
 			}
 			return amount;
 		}
@@ -636,6 +757,139 @@ public class AVLTree {
 			return amount;
 		}
 	}
+
+	class DeletionBalancer {
+		/**
+		 * Rebalances a node after deletion from the tree.
+		 *
+		 * @param node the parent of the deleted node
+		 * @return the number of rebalances that occurred
+		 */
+		public int rebalance(IAVLNode node) {
+			if (node == null) {
+				return 0;
+			}
+			int amount = 0;
+			IAVLNode rightChild = node.getRight();
+			IAVLNode leftChild = node.getLeft();
+
+			int nodeHeight = node.getHeight();
+			int leftDif = nodeHeight - leftChild.getHeight();
+			int rightDif = nodeHeight - rightChild.getHeight();
+
+			if ((leftDif == 2 && rightDif == 1) || (leftDif == 1 && rightDif == 2) || (leftDif == 1 && rightDif == 1)) {
+				//no rebalancing is needed
+				amount = 0;
+			} else if (leftDif == 2 && rightDif == 2) {
+				//case 1: demote and rebalance parent
+				amount += handleDeletionCase1(node);
+			} else if ((rightDif == 3 && leftDif == 1) || (rightDif == 1 && leftDif == 3)) {
+				//decides the side of the symmetric cases
+				boolean leftDifLarger = leftDif == 3;
+				//height difference of grandchildren from their parent
+				IAVLNode grandchildA = leftDifLarger ? rightChild.getLeft() : leftChild.getRight();
+				IAVLNode grandchildB = leftDifLarger ? rightChild.getRight() : leftChild.getLeft();
+				IAVLNode grandchildrenParent = grandchildA.getParent();
+				int grandchildDifA = grandchildrenParent.getHeight() - grandchildA.getHeight();
+				int grandchildDifB = grandchildrenParent.getHeight() - grandchildB.getHeight();
+
+				if (grandchildDifA == 1 && grandchildDifB == 1) {
+					//case 2: single rotation
+					amount += handleDeletionCase2(leftDifLarger, node, grandchildrenParent);
+				} else if (grandchildDifA == 2 && grandchildDifB == 1) {
+					//case 3: single rotation and rebalance parent
+					amount += handleDeletionCase3(leftDifLarger, node, grandchildrenParent);
+				} else if (grandchildDifA == 1 && grandchildDifB == 2) {
+					//case 4: double rotation and rebalance parent
+					amount += handleDeletionCase4(leftDifLarger, node, grandchildrenParent, grandchildA);
+				} else {
+					throw new IllegalStateException("Unsupported rebalance state");
+				}
+			} else {
+				throw new IllegalStateException("Unsupported rebalance state");
+			}
+
+			return amount;
+		}
+
+		/**
+		 * Handle case 1 of deletion, which requires demotion and more rebalancing
+		 *
+		 * @param node the rebalanced node
+		 * @return time complexity
+		 */
+		private int handleDeletionCase1(IAVLNode node) {
+			int amount = 0;
+			amount += node.demote();
+			amount += rebalance(node.getParent());
+			return amount;
+		}
+
+		/**
+		 * Handle case 2 of deletion, which requires rotation
+		 *
+		 * @param leftDifLarger       is the left height difference larger (decides the symmetric case side)
+		 * @param node                the rebalanced node
+		 * @param grandchildrenParent the node's child with grandchildren to rebalance
+		 * @return time complexity
+		 */
+		private int handleDeletionCase2(boolean leftDifLarger, IAVLNode node, IAVLNode grandchildrenParent) {
+			int amount = 0;
+			if (leftDifLarger) {
+				amount += rotations.rotateLeft(grandchildrenParent);
+			} else {
+				amount += rotations.rotateRight(grandchildrenParent);
+			}
+			amount += node.demote();
+			amount += grandchildrenParent.promote();
+			return amount;
+		}
+
+		/**
+		 * Handle case 3 of deletion, which requires rotation and more rebalancing
+		 *
+		 * @param leftDifLarger       is the left height difference larger (decides the symmetric case side)
+		 * @param node                the rebalanced node
+		 * @param grandchildrenParent the node's child with grandchildren to rebalance
+		 * @return time complexity
+		 */
+		private int handleDeletionCase3(boolean leftDifLarger, IAVLNode node, IAVLNode grandchildrenParent) {
+			int amount = 0;
+			if (leftDifLarger) {
+				amount += rotations.rotateLeft(grandchildrenParent);
+			} else {
+				amount += rotations.rotateRight(grandchildrenParent);
+			}
+			amount += node.demote();
+			amount += node.demote();
+			amount += rebalance(grandchildrenParent.getParent());
+			return amount;
+		}
+
+		/**
+		 * Handle case 4 of deletion, which requires double rotation and more rebalancing
+		 *
+		 * @param leftDifLarger       is the left height difference larger (decides the symmetric case side)
+		 * @param node                the rebalanced node
+		 * @param grandchildrenParent the node's child with grandchildren to rebalance
+		 * @param grandchild          the grandchild to rotate
+		 * @return time complexity
+		 */
+		private int handleDeletionCase4(boolean leftDifLarger, IAVLNode node, IAVLNode grandchildrenParent, IAVLNode grandchild) {
+			int amount = 0;
+			if (leftDifLarger) {
+				amount += rotations.rotateRightNLeft(grandchild);
+			} else {
+				amount += rotations.rotateLeftNRight(grandchild);
+			}
+			amount += node.demote();
+			amount += node.demote();
+			amount += grandchildrenParent.demote();
+			amount += grandchild.promote();
+			amount += rebalance(grandchild.getParent());
+			return amount;
+		}
+	}
 }
-  
+
 
