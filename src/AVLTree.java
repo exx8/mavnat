@@ -202,16 +202,16 @@ public class AVLTree {
 	 * otherwise, returns null
 	 */
 	public String search(int k) {
-		IAVLNode node=this.root;
-		while(node.isRealNode())
-			if(node.getKey()==k)
+		IAVLNode node = this.root;
+		while (node.isRealNode())
+			if (node.getKey() == k)
 				return node.getValue();
-			else if(node.getKey()>k)
-				node=node.getLeft();
+			else if (node.getKey() > k)
+				node = node.getLeft();
 			else
-				node=node.getRight();
+				node = node.getRight();
 
-			return null;
+		return null;
 	}
 
 	/**
@@ -282,10 +282,10 @@ public class AVLTree {
 	protected void updateMin() {
 		IAVLNode node = this.root;
 		if (empty())
-			min_pointer= null;
+			min_pointer = null;
 		while (node.getLeft().isRealNode())
 			node = node.getLeft();
-		min_pointer=node;
+		min_pointer = node;
 	}
 
 	/**
@@ -301,7 +301,7 @@ public class AVLTree {
 	protected void updateMax() {
 		IAVLNode node = this.root;
 		if (empty())
-			max_pointer=null;
+			max_pointer = null;
 		while (node.getRight().isRealNode())
 			node = node.getRight();
 		this.max_pointer = node;
@@ -366,50 +366,46 @@ public class AVLTree {
 	 * postcondition: none
 	 */
 	public AVLTree[] split(int x) {
-		AVLTree greaterTree=new AVLTree();
-		AVLTree smallerTree=new AVLTree();
+		AVLTree greaterTree = new AVLTree();
+		AVLTree smallerTree = new AVLTree();
 
-		IAVLNode node=this.root;
+		IAVLNode node = this.root;
 
 		//find node we look to split
-		while(node.getKey()!=x)
-		if(node.getKey()<x)
-			node=node.getRight();
-		else
-			node=node.getLeft();
+		while (node.getKey() != x)
+			if (node.getKey() < x)
+				node = node.getRight();
+			else
+				node = node.getLeft();
 
 
 		// travel till we get the root, while adding to lists left and right sons.
-		join(node.getRight(),greaterTree);
-		join(node.getLeft(),smallerTree);
+		join(node.getRight(), greaterTree);
+		join(node.getLeft(), smallerTree);
 
-		node=node.getParent();
+		node = node.getParent();
 
-		while(node!=null)
-		{
-			IAVLNode parent=node.getParent();
-			if(x>node.getKey())
-			{
-				join(node.getRight(),greaterTree);
+		while (node != null) {
+			IAVLNode parent = node.getParent();
+			if (x > node.getKey()) {
+				join(node.getRight(), greaterTree);
 				node.setFakeRight();
 				node.setParent(null);
-				join(node,smallerTree);
-			}
-			else
-			{
-				join(node.getLeft(),smallerTree);
+				join(node, smallerTree);
+			} else {
+				join(node.getLeft(), smallerTree);
 				node.setFakeLeft();
 				node.setParent(null);
-				join(node,greaterTree);
+				join(node, greaterTree);
 			}
-			node=parent;
+			node = parent;
 		}
 
 
-
-		return new AVLTree[]{smallerTree,greaterTree};
+		return new AVLTree[]{smallerTree, greaterTree};
 
 	}
+
 	/**
 	 * public join(IAVLNode x, AVLTree t)
 	 * <p>
