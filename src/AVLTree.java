@@ -9,11 +9,14 @@ import java.util.Optional;
  */
 
 public class AVLTree {
+
 	protected IAVLNode root;
 	protected int treeSize = 0;
 	private Rotations rotations = new Rotations();
 	private InsertionBalancer insertionBalancer = new InsertionBalancer();
 	private DeletionBalancer deletionBalancer = new DeletionBalancer();
+	private IAVLNode max_pointer = null;
+	private IAVLNode min_pointer = null;
 
 	//region private methods
 
@@ -222,7 +225,14 @@ public class AVLTree {
 	public int insert(int k, String i) {
 		IAVLNode node = new AVLNode(k, i);
 
-		return insertNode(node);
+		final int number_of_rebalances = insertNode(node);
+		updatePointersOfMaxNMin();
+		return number_of_rebalances;
+	}
+
+	protected void updatePointersOfMaxNMin() {
+		updateMax();
+		updateMin();
 	}
 
 	/**
@@ -253,6 +263,7 @@ public class AVLTree {
 		}
 		treeSize--;
 		int amount = deletionBalancer.rebalance(deletedNodeParent);
+		updatePointersOfMaxNMin();
 		return amount;
 	}
 
@@ -263,7 +274,18 @@ public class AVLTree {
 	 * or null if the tree is empty
 	 */
 	public String min() {
-		return "42"; // to be replaced by student code
+
+
+		return this.min_pointer.getValue();
+	}
+
+	protected void updateMin() {
+		IAVLNode node = this.root;
+		if (empty())
+			min_pointer= null;
+		while (node.getLeft().isRealNode())
+			node = node.getLeft();
+		min_pointer=node;
 	}
 
 	/**
@@ -273,7 +295,16 @@ public class AVLTree {
 	 * or null if the tree is empty
 	 */
 	public String max() {
-		return "42"; // to be replaced by student code
+		return this.max_pointer.getValue();
+	}
+
+	protected void updateMax() {
+		IAVLNode node = this.root;
+		if (empty())
+			max_pointer=null;
+		while (node.getRight().isRealNode())
+			node = node.getRight();
+		this.max_pointer = node;
 	}
 
 	/**
@@ -336,7 +367,7 @@ public class AVLTree {
 	public AVLTree[] split(int x) {
 		return null;
 	}
-
+//@todo add updatePointersOfMaxNMin to split
 	/**
 	 * public join(IAVLNode x, AVLTree t)
 	 * <p>
@@ -390,6 +421,7 @@ public class AVLTree {
 			insertionBalancer.rebalance(x);
 		}
 		treeSize = newSize;
+		updatePointersOfMaxNMin();
 		return complexity;
 	}
 
