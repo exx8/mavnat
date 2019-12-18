@@ -199,7 +199,16 @@ public class AVLTree {
 	 * otherwise, returns null
 	 */
 	public String search(int k) {
-		return "42";  // to be replaced by student code
+		IAVLNode node=this.root;
+		while(node.isRealNode())
+			if(node.getKey()==k)
+				return node.getValue();
+			else if(node.getKey()>k)
+				node=node.getLeft();
+			else
+				node=node.getRight();
+
+			return null;
 	}
 
 	/**
