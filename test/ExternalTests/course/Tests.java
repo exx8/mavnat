@@ -1,3 +1,4 @@
+
 public class Tests {
 
     public boolean empty() {
@@ -101,26 +102,13 @@ public class Tests {
         return (avlTree.size() == 75);
     }
 
-    public boolean less() {
-        AVLTree avlTree = new AVLTree();
-        for (int i = 0; i < 1000; i++) {
-            avlTree.insert(i, "num" + i);
-        }
-        return (avlTree.less(786) == 309291);
-    }
 
-    public boolean select() {
-        AVLTree avlTree = new AVLTree();
-        for (int i = 0; i < 1000; i++) {
-            avlTree.insert(i, "num" + i);
-        }
-        return (avlTree.select(501).equals("num" + 500));
-    }
+
 
     public boolean avlNodeFuncsImplemented() {
         AVLTree avlTree = new AVLTree();
         avlTree.insert(1, "1");
-        ActualAVLTree.IAVLNode avlNode = (ActualAVLTree.IAVLNode) avlTree.getRoot();
+        AVLTree.IAVLNode avlNode = (AVLTree.IAVLNode) avlTree.getRoot();
         return true;
     }
 

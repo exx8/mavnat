@@ -300,29 +300,9 @@ public class ExTester {
                     }
                 }), 8);
 
-        runWithInterrupt(success,
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            success[9] = first_tester.less() ? SuccessStatus.PASS : SuccessStatus.FAIL;
-                        } catch (Throwable e) {
-                            success[9] = SuccessStatus.EXCEPTION;
-                        }
-                    }
-                }), 9);
 
-        runWithInterrupt(success,
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            success[10] = first_tester.select() ? SuccessStatus.PASS : SuccessStatus.FAIL;
-                        } catch (Throwable e) {
-                            success[10] = SuccessStatus.EXCEPTION;
-                        }
-                    }
-                }), 10);
+
+
 
 
         runWithInterrupt(success,

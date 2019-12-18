@@ -57,4 +57,36 @@ class AVLTreeTest {
 
 		assertArrayEquals(new String[]{}, values);
 	}
+
+	@Test
+	void deleteTreeTestParent() {
+		AVLTree tree = new AVLTree();
+		tree.insert(15, "a");
+		tree.insert(11, "a");
+		tree.insert(17, "a");
+		tree.insert(18, "a");
+		tree.insert(12, "a");
+		tree.insert(13, "a");
+
+		tree.delete(15);
+		TreePrinter.print(tree, false);
+	}
+
+
+	@Test
+	void deleteTreeTest13() {
+		AVLTree tree = new AVLTree();
+		tree.insert(15, "a");
+		tree.insert(11, "a");
+		tree.insert(17, "a");
+		tree.insert(18, "a");
+		tree.insert(12, "a");
+		tree.insert(13, "a");
+
+		tree.delete(13);
+		tree.delete(18);
+		tree.delete(12);
+
+		TreePrinter.print(tree, false);
+	}
 }
