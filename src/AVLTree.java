@@ -388,12 +388,10 @@ public class AVLTree {
 		while (node != null) {
 			IAVLNode parent = node.getParent();
 			if (x > node.getKey()) {
-				join(node.getRight(), greaterTree);
 				node.setFakeRight();
 				node.setParent(null);
 				join(node, smallerTree);
 			} else {
-				join(node.getLeft(), smallerTree);
 				node.setFakeLeft();
 				node.setParent(null);
 				join(node, greaterTree);
