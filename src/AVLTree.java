@@ -12,7 +12,8 @@ public class AVLTree {
 	protected IAVLNode root;
 	protected int treeSize = 0;
 	private Rotations rotations = new Rotations();
-	private Balancer balancer = new Balancer();
+	private InsertionBalancer insertionBalancer = new InsertionBalancer();
+	private DeletionBalancer deletionBalancer = new DeletionBalancer();
 
 	//region private methods
 
@@ -70,7 +71,7 @@ public class AVLTree {
 				currNode.getParent().setRight(node);
 			}
 			node.setParent(currNode.getParent());
-			rebalances = balancer.rebalanceInsertion(node);
+			rebalances = insertionBalancer.rebalance(node);
 		}
 		treeSize++;
 		return rebalances;
@@ -101,67 +102,6 @@ public class AVLTree {
 		return successor;
 	}
 
-	//endregion
-
-	/**
-	 * public boolean empty()
-	 * <p>
-	 * returns true if and only if the tree is empty
-	 */
-	public boolean empty() {
-		return getRoot() == null;
-	}
-
-	/**
-	 * public String search(int k)
-	 * <p>
-	 * returns the info of an item with key k if it exists in the tree
-	 * otherwise, returns null
-	 */
-	public String search(int k) {
-		return "42";  // to be replaced by student code
-	}
-
-	/**
-	 * public int insert(int k, String i)
-	 * <p>
-	 * inserts an item with key k and info i to the AVL tree.
-	 * the tree must remain valid (keep its invariants).
-	 * returns the number of rebalancing operations, or 0 if no rebalancing operations were necessary.
-	 * returns -1 if an item with key k already exists in the tree.
-	 */
-	public int insert(int k, String i) {
-		IAVLNode node = new AVLNode(k, i);
-
-		return insertNode(node);
-	}
-
-	/**
-	 * public int delete(int k)
-	 * <p>
-	 * deletes an item with key k from the binary tree, if it is there;
-	 * the tree must remain valid (keep its invariants).
-	 * returns the number of rebalancing operations, or 0 if no rebalancing operations were needed.
-	 * returns -1 if an item with key k was not found in the tree.
-	 */
-	public int delete(int k) {
-		final Optional<IAVLNode> placeToDelete = findPlace(k);
-		//return -1 if the key was not found
-		if (!placeToDelete.isPresent())
-			return -1;
-
-		final IAVLNode deletedNode = placeToDelete.get();
-		final boolean hasTwoChildren = deletedNode.getLeft().isRealNode() && deletedNode.getRight().isRealNode();
-
-		if (!hasTwoChildren) {
-			deleteDirectly(deletedNode);
-		} else {
-			deleteSuccessor(deletedNode);
-		}
-		treeSize--;
-		return 0;
-	}
-
 	/**
 	 * Delete a node by replacing it with its successor and deleting the successor instead
 	 *
@@ -171,6 +111,10 @@ public class AVLTree {
 	private IAVLNode deleteSuccessor(IAVLNode node) {
 		IAVLNode successor = findChildSuccessor(node);
 		IAVLNode successorParent = successor.getParent();
+		if (successorParent == node) {
+			//if the successor is the direct child of node, it will be similar to direct deletion
+			successorParent = successor;
+		}
 		//delete the successor
 		deleteDirectly(successor);
 		//replace node with its successor
@@ -178,6 +122,8 @@ public class AVLTree {
 		node.getLeft().setParent(successor);
 		successor.setRight(node.getRight());
 		node.getRight().setParent(successor);
+		successor.setHeight(node.getHeight());
+
 		IAVLNode parent = node.getParent();
 		if (parent != null) {
 			if (parent.getRight() == node) {
@@ -235,94 +181,70 @@ public class AVLTree {
 
 	}
 
-	protected int deletionRebalance(IAVLNode node) {
-		if (node == null)
-			return 0;
-		if (!node.isRealNode())
-			return 0;
-		IAVLNode nextRootPreviousParentRight = node.getRight();
-		IAVLNode nextRootPreviousParentLeft = node.getLeft();
+	//endregion
 
-		boolean bothChildrenHaveSameHeight = nextRootPreviousParentRight.getHeight() == node.getLeft().getHeight();
-		int nextRootPreviousParentHeight = node.getHeight();
-		int leftToParentHeightGap = nextRootPreviousParentHeight - node.getLeft().getHeight();
-		int rightToParentHeightGap = nextRootPreviousParentHeight - nextRootPreviousParentRight.getHeight();
+	/**
+	 * public boolean empty()
+	 * <p>
+	 * returns true if and only if the tree is empty
+	 */
+	public boolean empty() {
+		return getRoot() == null;
+	}
 
-		boolean gapBetweenLeftAndRootIs2 = leftToParentHeightGap == 2;
-		if (bothChildrenHaveSameHeight && leftToParentHeightGap == 1)
-			return 0; //everything fine do nothing
-		else if ((leftToParentHeightGap == 2 && rightToParentHeightGap == 1) || (leftToParentHeightGap == 1 && rightToParentHeightGap == 2))
-			return 0; //everything fine do nothing
-		else if (bothChildrenHaveSameHeight && gapBetweenLeftAndRootIs2) {
-			//case 1
-			node.demote();
-			return deletionRebalance(node.getParent());
+	/**
+	 * public String search(int k)
+	 * <p>
+	 * returns the info of an item with key k if it exists in the tree
+	 * otherwise, returns null
+	 */
+	public String search(int k) {
+		return "42";  // to be replaced by student code
+	}
 
-		} else if (nextRootPreviousParentLeft.getRight() == null) {
-			rotations.rotateRight(nextRootPreviousParentLeft);
-			return deletionRebalance(nextRootPreviousParentLeft) + 1;
-		} else if (nextRootPreviousParentLeft.getLeft() == null) {
-			rotations.rotateLeft(nextRootPreviousParentLeft);
-			return deletionRebalance(nextRootPreviousParentLeft) + 1;
-		} else if (nextRootPreviousParentRight.getRight() == null) {
+	/**
+	 * public int insert(int k, String i)
+	 * <p>
+	 * inserts an item with key k and info i to the AVL tree.
+	 * the tree must remain valid (keep its invariants).
+	 * returns the number of rebalancing operations, or 0 if no rebalancing operations were necessary.
+	 * returns -1 if an item with key k already exists in the tree.
+	 */
+	public int insert(int k, String i) {
+		IAVLNode node = new AVLNode(k, i);
 
-			rotations.rotateRight(nextRootPreviousParentLeft);
-			return deletionRebalance(nextRootPreviousParentLeft) + 1;
-		} else if (nextRootPreviousParentRight.getLeft() == null) {
-			rotations.rotateLeft(nextRootPreviousParentLeft);
-			return deletionRebalance(nextRootPreviousParentLeft) + 1;
-		} else if (rightToParentHeightGap == 3 && leftToParentHeightGap == 1) {
-			//case 2 left
-			if (nextRootPreviousParentRight.getRight().getHeight() - nextRootPreviousParentRight.getHeight() == 1 && nextRootPreviousParentRight.getLeft().getHeight() - nextRootPreviousParentRight.getHeight() == 1) {
-				rotations.rotateLeft((node));
-				node.demote();
-				node.promote();
+		return insertNode(node);
+	}
 
-				return deletionRebalance(node.getParent()) + 1;
-			}
-			//case 3 left
-			if (nextRootPreviousParentRight.getRight().getHeight() - nextRootPreviousParentRight.getHeight() == 1 && nextRootPreviousParentRight.getLeft().getHeight() - nextRootPreviousParentRight.getHeight() == 2) {
-				rotations.rotateLeft((node));
-				node.demote();
-				node.demote();
+	/**
+	 * public int delete(int k)
+	 * <p>
+	 * deletes an item with key k from the binary tree, if it is there;
+	 * the tree must remain valid (keep its invariants).
+	 * returns the number of rebalancing operations, or 0 if no rebalancing operations were needed.
+	 * returns -1 if an item with key k was not found in the tree.
+	 */
+	public int delete(int k) {
+		final Optional<IAVLNode> placeToDelete = findPlace(k);
+		//return -1 if the key was not found
+		if (!placeToDelete.isPresent())
+			return -1;
 
-				return deletionRebalance(node.getParent()) + 1;
-			}
-			//case 4 left
-			else if (nextRootPreviousParentRight.getLeft().getHeight() - nextRootPreviousParentRight.getHeight() == 1 && nextRootPreviousParentRight.getRight().getHeight() - nextRootPreviousParentRight.getHeight() == 2) {
-				rotations.rotateLeft((node));
-				rotations.rotateLeft((node));//twice
+		final IAVLNode deletedNode = placeToDelete.get();
+		final boolean hasTwoChildren = deletedNode.getLeft().isRealNode() && deletedNode.getRight().isRealNode();
 
-				return deletionRebalance(node.getParent()) + 2;
-			}
-
-		} else if (rightToParentHeightGap == 1 && leftToParentHeightGap == 3) {
-			//case 2 right
-
-			if (nextRootPreviousParentLeft.getRight().getHeight() - nextRootPreviousParentLeft.getHeight() == 1 && nextRootPreviousParentLeft.getLeft().getHeight() - nextRootPreviousParentLeft.getHeight() == 1) {
-				rotations.rotateRight((node));
-				node.demote();
-
-				return deletionRebalance(node.getParent()) + 1;
-			}
-			//case 3 right
-			if (nextRootPreviousParentLeft.getRight().getHeight() - nextRootPreviousParentLeft.getHeight() == 1 && nextRootPreviousParentLeft.getLeft().getHeight() - nextRootPreviousParentLeft.getHeight() == 2) {
-				rotations.rotateRight((node));
-				node.demote();
-				node.demote();
-
-				return deletionRebalance(node.getParent()) + 1;
-			}
-			//case 4 right
-			else if (nextRootPreviousParentLeft.getLeft().getHeight() - nextRootPreviousParentLeft.getHeight() == 1 && nextRootPreviousParentLeft.getRight().getHeight() - nextRootPreviousParentLeft.getHeight() == 2) {
-				rotations.rotateRight((node));
-				rotations.rotateRight((node));//twice
-
-				return deletionRebalance(node.getParent()) + 2;
-			}
+		//the parent of the node that was actually deleted
+		//in the case of deletion of a successor, it will be the successor's parent
+		IAVLNode deletedNodeParent;
+		if (!hasTwoChildren) {
+			deletedNodeParent = deletedNode.getParent();
+			deleteDirectly(deletedNode);
+		} else {
+			deletedNodeParent = deleteSuccessor(deletedNode);
 		}
-
-		throw new RuntimeException("shouldn't have reached here");
+		treeSize--;
+		int amount = deletionBalancer.rebalance(deletedNodeParent);
+		return amount;
 	}
 
 	/**
@@ -456,7 +378,7 @@ public class AVLTree {
 				//if this tree's height is smaller than t's height, its root should change to be t's root
 				root = largerTree.root;
 			}
-			balancer.rebalanceInsertion(x);
+			insertionBalancer.rebalance(x);
 		}
 		treeSize = newSize;
 		return complexity;
@@ -723,14 +645,14 @@ public class AVLTree {
 		}
 	}
 
-	class Balancer {
+	class InsertionBalancer {
 		/**
 		 * Rebalances a node after insertion to the tree.
 		 *
 		 * @param node the node to rebalance
 		 * @return the number of rebalances that occurred
 		 */
-		public int rebalanceInsertion(IAVLNode node) {
+		public int rebalance(IAVLNode node) {
 			int amount = 0;
 			IAVLNode parent = node.getParent();
 			if (parent != null) {
@@ -773,7 +695,7 @@ public class AVLTree {
 		private int handleInsertionCase1(IAVLNode parent) {
 			int amount = 0;
 			amount += parent.promote();
-			amount += rebalanceInsertion(parent);
+			amount += rebalance(parent);
 			return amount;
 		}
 
@@ -801,7 +723,7 @@ public class AVLTree {
 				//this is a case that may happen in join where leftDif=rightDif=1
 				//after the rotation, it becomes case 1 and more rebalancing is needed
 				amount += node.promote();
-				amount += rebalanceInsertion(node);
+				amount += rebalance(node);
 			}
 			return amount;
 		}
@@ -832,6 +754,84 @@ public class AVLTree {
 			amount += rotatedChild.promote();
 			amount += rotatedChild.getLeft().demote();
 			amount += rotatedChild.getRight().demote();
+			return amount;
+		}
+	}
+
+	class DeletionBalancer {
+		/**
+		 * Rebalances a node after deletion from the tree.
+		 *
+		 * @param node the parent of the deleted node
+		 * @return the number of rebalances that occurred
+		 */
+		protected int rebalance(IAVLNode node) {
+			if (node == null) {
+				return 0;
+			}
+			int amount = 0;
+			IAVLNode rightChild = node.getRight();
+			IAVLNode leftChild = node.getLeft();
+
+			int nodeHeight = node.getHeight();
+			int leftDif = nodeHeight - leftChild.getHeight();
+			int rightDif = nodeHeight - rightChild.getHeight();
+
+			if ((leftDif == 2 && rightDif == 1) || (leftDif == 1 && rightDif == 2) || (leftDif == 1 && rightDif == 1)) {
+				//no rebalancing is needed
+				amount = 0;
+			} else if (leftDif == 2 && rightDif == 2) {
+				//case 1: demote and rebalance parent
+				amount += node.demote();
+				amount += rebalance(node.getParent());
+			} else if ((rightDif == 3 && leftDif == 1) || (rightDif == 1 && leftDif == 3)) {
+				//decides the side of the symmetric cases
+				boolean leftDifLarger = leftDif == 3;
+				//height difference of grandchildren from their parent
+				IAVLNode grandchildA = leftDifLarger ? rightChild.getLeft() : leftChild.getRight();
+				IAVLNode grandchildB = leftDifLarger ? rightChild.getRight() : leftChild.getLeft();
+				IAVLNode grandchildrenParent = grandchildA.getParent();
+				int grandchildDifA = grandchildrenParent.getHeight() - grandchildA.getHeight();
+				int grandchildDifB = grandchildrenParent.getHeight() - grandchildB.getHeight();
+
+				if (grandchildDifA == 1 && grandchildDifB == 1) {
+					//case 2: single rotation
+					if (leftDifLarger) {
+						amount += rotations.rotateLeft(grandchildrenParent);
+					} else {
+						amount += rotations.rotateRight(grandchildrenParent);
+					}
+					amount += node.demote();
+					amount += grandchildrenParent.promote();
+				} else if (grandchildDifA == 2 && grandchildDifB == 1) {
+					//case 3: single rotation and rebalance parent
+					if (leftDifLarger) {
+						amount += rotations.rotateLeft(grandchildrenParent);
+					} else {
+						amount += rotations.rotateRight(grandchildrenParent);
+					}
+					amount += node.demote();
+					amount += node.demote();
+					amount += rebalance(grandchildrenParent.getParent());
+				} else if (grandchildDifA == 1 && grandchildDifB == 2) {
+					//case 4: double rotation and rebalance parent
+					if (leftDifLarger) {
+						amount += rotations.rotateRightNLeft(grandchildA);
+					} else {
+						amount += rotations.rotateLeftNRight(grandchildA);
+					}
+					amount += node.demote();
+					amount += node.demote();
+					amount += grandchildrenParent.demote();
+					amount += grandchildA.promote();
+					amount += rebalance(grandchildA.getParent());
+				} else {
+					throw new IllegalStateException("Unsupported rebalance state");
+				}
+			} else {
+				throw new IllegalStateException("Unsupported rebalance state");
+			}
+
 			return amount;
 		}
 	}

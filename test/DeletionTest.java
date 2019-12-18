@@ -60,9 +60,36 @@ public class DeletionTest {
 			int[] currentKeys = tree.keysToArray();
 			assertArrayEquals(keys.stream().mapToInt(k -> k).toArray(), currentKeys);
 			assertEquals(keys.size(), tree.size());
-			TestUtils.testBST(tree, false);
+			TestUtils.testAVL(tree);
 		}
 
 		assertSame(null, tree.getRoot());
+	}
+
+	@Test
+	void deletionTest_SpecificCase() {
+		AVLTree tree = TestUtils.generateTree(Arrays.asList(57, 24, 5, 13, 37, 81, 78, 71, 79, 92));
+		tree.delete(81);
+		TestUtils.testAVL(tree);
+	}
+
+	@Test
+	void deletionTest_SpecificCase2() {
+		AVLTree tree = TestUtils.generateTree(Arrays.asList(84, 49, 20, 8, 45, 73, 82, 93, 91, 89, 106, 102, 136, 108, 145));
+		tree.delete(106);
+		tree.delete(73);
+		tree.delete(49);
+
+		tree.delete(89);
+		TestUtils.testAVL(tree);
+	}
+
+	@Test
+	void deletionTest_SpecificCase3() {
+		AVLTree tree = TestUtils.generateTree(Arrays.asList(86, 54, 16, 9, 14, 31, 36, 70, 63, 77, 74, 133, 100, 132, 140));
+		tree.delete(100);
+		tree.delete(9);
+		tree.delete(36);
+		TestUtils.testAVL(tree);
 	}
 }
