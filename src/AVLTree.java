@@ -369,46 +369,35 @@ public class AVLTree {
 		AVLTree greaterTree = new AVLTree();
 		AVLTree smallerTree = new AVLTree();
 
-		IAVLNode node = this.root;
-
-		//find node we look to split
-		while (node.getKey() != x) {
-			if (node.getKey() < x)
-				node = node.getRight();
-			else
-				node = node.getLeft();
-		}
-		greaterTree.root=node.getRight();
+		IAVLNode node = findPlace(x).get();
+		greaterTree.root = node.getRight().isRealNode() ? node.getRight() : null;
 		node.getRight().setParent(null);
-		// travel till we get the root, while adding to lists left and right sons.
-		smallerTree.root=node.getLeft();
+
+		smallerTree.root = node.getLeft().isRealNode() ? node.getLeft() : null;
 		node.getLeft().setParent(null);
 
 		node = node.getParent();
-
+		// travel until we get to the root, while joining the left or right subtrees to the split trees
 		while (node != null) {
-			IAVLNode parent = node.getParent();
 			if (x > node.getKey()) {
 				node.setFakeRight();
 				node.setParent(null);
 				node.getLeft().setParent(null);
-				AVLTree tree=new AVLTree();
-				tree.root=node.getLeft();
+				AVLTree tree = new AVLTree();
+				tree.root = node.getLeft();
 				smallerTree.join(node, tree);
 			} else {
 				node.setFakeLeft();
 				node.setParent(null);
 				node.getRight().setParent(null);
-				AVLTree tree=new AVLTree();
-				tree.root=node.getRight();
+				AVLTree tree = new AVLTree();
+				tree.root = node.getRight();
 				greaterTree.join(node, tree);
 			}
-			node = parent;
+			node = node.getParent();
 		}
 
-
 		return new AVLTree[]{smallerTree, greaterTree};
-
 	}
 
 	/**
