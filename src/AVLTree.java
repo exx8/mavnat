@@ -264,14 +264,16 @@ public class AVLTree {
 	 * otherwise, returns null
 	 */
 	public String search(int k) {
-		IAVLNode node = this.root;
-		while (node.isRealNode())
-			if (node.getKey() == k)
+		IAVLNode node = root;
+		while (node != null && node.isRealNode()) {
+			if (node.getKey() == k) {
 				return node.getValue();
-			else if (node.getKey() > k)
+			} else if (node.getKey() > k) {
 				node = node.getLeft();
-			else
+			} else {
 				node = node.getRight();
+			}
+		}
 
 		return null;
 	}
@@ -441,6 +443,16 @@ public class AVLTree {
 			}
 			node = parent;
 		}
+
+		//set min and max
+		if (x != min.getKey()) {
+			smallerTree.min = min;
+		}
+		if (x != max.getKey()) {
+			greaterTree.max = max;
+		}
+		smallerTree.updateMax();
+		greaterTree.updateMin();
 
 		return new AVLTree[]{smallerTree, greaterTree};
 	}

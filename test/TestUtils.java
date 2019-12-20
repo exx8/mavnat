@@ -14,6 +14,18 @@ public class TestUtils {
 		testHeights(tree, true);
 		testParents(tree);
 		testSize(tree);
+		testMinMax(tree);
+	}
+
+	private static void testMinMax(AVLTree tree) {
+		int[] inOrder = tree.keysToArray();
+		if (inOrder.length > 0) {
+			Assertions.assertEquals(inOrder[0], tree.min.getKey());
+			Assertions.assertEquals(inOrder[inOrder.length - 1], tree.max.getKey());
+		} else {
+			Assertions.assertSame(null, tree.min);
+			Assertions.assertSame(null, tree.max);
+		}
 	}
 
 	/**
@@ -27,6 +39,7 @@ public class TestUtils {
 		}
 		testParents(tree);
 		testSize(tree);
+		testMinMax(tree);
 	}
 
 	public static void testHeights(AVLTree tree, boolean testAVLdif) {
@@ -118,6 +131,8 @@ public class TestUtils {
 		generateTreeNode(tree, root, preorder, 1, preorder.size());
 		updateHeightRec(root);
 		updateSizeRec(root);
+		tree.updateMin();
+		tree.updateMax();
 		return tree;
 	}
 
