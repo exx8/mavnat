@@ -60,6 +60,15 @@ public class DeletionTest {
 			int[] currentKeys = tree.keysToArray();
 			assertArrayEquals(keys.stream().mapToInt(k -> k).toArray(), currentKeys);
 			assertEquals(keys.size(), tree.size());
+			if (i < n - 1) {
+				int min = keys.get(0);
+				int max = keys.get(keys.size() - 1);
+				assertEquals(min, tree.min.getKey());
+				assertEquals(max, tree.max.getKey());
+			} else {
+				assertSame(null, tree.min);
+				assertSame(null, tree.max);
+			}
 			TestUtils.testAVL(tree);
 		}
 
