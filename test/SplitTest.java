@@ -42,13 +42,11 @@ public class SplitTest {
 			int[] lowerKeys = keysList.stream().filter(k -> k < splitKey).sorted().mapToInt(k -> k).toArray();
 			int[] higherKeys = keysList.stream().filter(k -> k > splitKey).sorted().mapToInt(k -> k).toArray();
 
-			//System.out.println(TestUtils.preOrderScan(tree));
-			//System.out.println("Split on: " + splitKey);
 			AVLTree[] splitTrees = tree.split(splitKey);
-			/*assertArrayEquals(lowerKeys, splitTrees[0].keysToArray());
+			assertArrayEquals(lowerKeys, splitTrees[0].keysToArray());
 			assertArrayEquals(higherKeys, splitTrees[1].keysToArray());
 			TestUtils.testAVL(splitTrees[0]);
-			TestUtils.testAVL(splitTrees[1]);*/
+			TestUtils.testAVL(splitTrees[1]);
 		}
 	}
 
@@ -71,5 +69,39 @@ public class SplitTest {
 		AVLTree tree = TestUtils.generateTree(Arrays.asList(133, 1, 73, 369));
 		TreePrinter.print(tree);
 		tree.split(369);
+	}
+
+	@Test
+	void splitTest_SpecificCase4() {
+		AVLTree tree = TestUtils.generateTree(Arrays.asList(101, 79, 52, 137, 276));
+		TreePrinter.print(tree);
+
+		AVLTree[] splitTrees = tree.split(137);
+		TreePrinter.print(splitTrees[0]);
+		TreePrinter.print(splitTrees[1]);
+
+		int[] lowerKeys = {52, 79, 101};
+		int[] higherKeys = {276};
+		assertArrayEquals(lowerKeys, splitTrees[0].keysToArray());
+		assertArrayEquals(higherKeys, splitTrees[1].keysToArray());
+		TestUtils.testAVL(splitTrees[0]);
+		TestUtils.testAVL(splitTrees[1]);
+	}
+
+	@Test
+	void splitTest_SpecificCase5() {
+		AVLTree tree = TestUtils.generateTree(Arrays.asList(392, 177, 162, 342, 439));
+		TreePrinter.print(tree);
+
+		AVLTree[] splitTrees = tree.split(162);
+		//TreePrinter.print(splitTrees[0]);
+		//TreePrinter.print(splitTrees[1]);
+
+		int[] lowerKeys = {};
+		int[] higherKeys = {177, 342, 392, 439};
+		assertArrayEquals(lowerKeys, splitTrees[0].keysToArray());
+		assertArrayEquals(higherKeys, splitTrees[1].keysToArray());
+		TestUtils.testAVL(splitTrees[0]);
+		TestUtils.testAVL(splitTrees[1]);
 	}
 }
