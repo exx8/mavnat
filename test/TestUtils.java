@@ -14,6 +14,18 @@ public class TestUtils {
 		testHeights(tree, true);
 		testParents(tree);
 		testSize(tree);
+		testMinMax(tree);
+	}
+
+	private static void testMinMax(AVLTree tree) {
+		int[] inOrder = tree.keysToArray();
+		if (inOrder.length > 0) {
+			Assertions.assertEquals(inOrder[0], tree.min.getKey());
+			Assertions.assertEquals(inOrder[inOrder.length - 1], tree.max.getKey());
+		} else {
+			Assertions.assertSame(null, tree.min);
+			Assertions.assertSame(null, tree.max);
+		}
 	}
 
 	/**
@@ -27,6 +39,7 @@ public class TestUtils {
 		}
 		testParents(tree);
 		testSize(tree);
+		testMinMax(tree);
 	}
 
 	public static void testHeights(AVLTree tree, boolean testAVLdif) {
@@ -36,15 +49,18 @@ public class TestUtils {
 	}
 
 	public static void testSize(AVLTree tree) {
-		int actualSize = testSizeRec(tree.getRoot());
-		Assertions.assertEquals(actualSize, tree.size());
+		testSizeRec(tree.getRoot());
 	}
 
 	private static int testSizeRec(AVLTree.IAVLNode node) {
 		if (node == null || !node.isRealNode()) {
+			if (node != null) {
+				Assertions.assertEquals(0, node.getSize());
+			}
 			return 0;
 		} else {
 			int size = testSizeRec(node.getLeft()) + testSizeRec(node.getRight()) + 1;
+			Assertions.assertEquals(size, node.getSize());
 			return size;
 		}
 	}
@@ -112,20 +128,31 @@ public class TestUtils {
 		AVLTree tree = new AVLTree();
 		AVLTree.IAVLNode root = tree.new AVLNode(preorder.get(0), "a");
 		tree.root = root;
-		tree.treeSize = preorder.size();
 		generateTreeNode(tree, root, preorder, 1, preorder.size());
 		updateHeightRec(root);
-		tree.treeSize = preorder.size();
+		updateSizeRec(root);
+		tree.updateMin();
+		tree.updateMax();
 		return tree;
 	}
 
-	public static int updateHeightRec(AVLTree.IAVLNode node) {
+	private static int updateHeightRec(AVLTree.IAVLNode node) {
 		if (node.isRealNode()) {
 			int height = Math.max(updateHeightRec(node.getLeft()), updateHeightRec(node.getRight())) + 1;
 			node.setHeight(height);
 			return height;
 		} else {
 			return node.getHeight();
+		}
+	}
+
+	private static int updateSizeRec(AVLTree.IAVLNode node) {
+		if (node.isRealNode()) {
+			int size = updateSizeRec(node.getLeft()) + updateSizeRec(node.getRight()) + 1;
+			node.setSize(size);
+			return size;
+		} else {
+			return 0;
 		}
 	}
 

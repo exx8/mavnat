@@ -11,12 +11,11 @@ import java.util.Optional;
 public class AVLTree {
 
 	protected IAVLNode root;
-	protected int treeSize = 0;
 	private Rotations rotations = new Rotations();
 	private InsertionBalancer insertionBalancer = new InsertionBalancer();
 	private DeletionBalancer deletionBalancer = new DeletionBalancer();
-	private IAVLNode max_pointer = null;
-	private IAVLNode min_pointer = null;
+	protected IAVLNode min;
+	protected IAVLNode max;
 
 	//region private methods
 
@@ -44,7 +43,7 @@ public class AVLTree {
 	}
 
 	/**
-	 * Inserts a node to the AVL tree.
+	 * Inserts a node to the AVL tree
 	 *
 	 * @param node the node to insert
 	 * @return the number of rebalancing operations, or 0 if no rebalancing operations were necessary.
@@ -74,21 +73,34 @@ public class AVLTree {
 				currNode.getParent().setRight(node);
 			}
 			node.setParent(currNode.getParent());
+			updateSizeToRoot(node.getParent());
 			rebalances = insertionBalancer.rebalance(node);
 		}
-		treeSize++;
+		//update min and max
+		if (min == null || node.getKey() < min.getKey()) {
+			min = node;
+		}
+		if (max == null || node.getKey() > max.getKey()) {
+			max = node;
+		}
+
 		return rebalances;
 	}
 
-	private int inorderScan(IAVLNode node, IAVLNode[] arr, int index) {
+	/**
+	 * Recursively fill an array with an in-order scan of the tree's nodes
+	 *
+	 * @param node  the current node (should be the root for the first call)
+	 * @param arr   the array to fill with in-order nodes (should be empty for the first call)
+	 * @param index the current index in the array (should be 0 for the first call)
+	 */
+	private void inorderScan(IAVLNode node, IAVLNode[] arr, int index) {
 		if (node != null && node.isRealNode()) {
-			int amount = inorderScan(node.getLeft(), arr, index);
-			index += amount;
+			inorderScan(node.getLeft(), arr, index);
+			index += node.getLeft().getSize();
 			arr[index] = node;
-			amount += 1 + inorderScan(node.getRight(), arr, index + 1);
-			return amount;
+			inorderScan(node.getRight(), arr, index + 1);
 		}
-		return 0;
 	}
 
 	/**
@@ -126,6 +138,7 @@ public class AVLTree {
 		successor.setRight(node.getRight());
 		node.getRight().setParent(successor);
 		successor.setHeight(node.getHeight());
+		successor.setSize(node.getSize());
 
 		IAVLNode parent = node.getParent();
 		if (parent != null) {
@@ -165,11 +178,24 @@ public class AVLTree {
 		replacementNode.setParent(parent);
 	}
 
-	protected Optional<IAVLNode> findPlace(int key) {
-		return findPlace(key, this.root);
+	/**
+	 * Find a node in the tree by its key
+	 *
+	 * @param key the key of the searched node
+	 * @return AVL node
+	 */
+	protected Optional<IAVLNode> findNodeByKey(int key) {
+		return findNodeByKey(key, this.root);
 	}
 
-	protected static Optional<IAVLNode> findPlace(int key, IAVLNode currentNode) {
+	/**
+	 * Find a node in a subtree by its key
+	 *
+	 * @param key         the key of the searched node
+	 * @param currentNode the parent of the subtree to search
+	 * @return AVL node
+	 */
+	protected Optional<IAVLNode> findNodeByKey(int key, IAVLNode currentNode) {
 		if (currentNode == null)
 			return Optional.empty();
 		if (!currentNode.isRealNode())
@@ -178,10 +204,51 @@ public class AVLTree {
 		if (currentNodeKey == key)
 			return Optional.of(currentNode);
 		else if (currentNodeKey > key)
-			return findPlace(key, currentNode.getLeft());
+			return findNodeByKey(key, currentNode.getLeft());
 		else
-			return findPlace(key, currentNode.getRight());
+			return findNodeByKey(key, currentNode.getRight());
+	}
 
+	/**
+	 * Update the minimum field
+	 */
+	protected void updateMin() {
+		if (empty()) {
+			min = null;
+		} else {
+			IAVLNode node = root;
+			while (node.getLeft().isRealNode()) {
+				node = node.getLeft();
+			}
+			min = node;
+		}
+	}
+
+	/**
+	 * Update the maximum field
+	 */
+	protected void updateMax() {
+		if (empty()) {
+			max = null;
+		} else {
+			IAVLNode node = root;
+			while (node.getRight().isRealNode()) {
+				node = node.getRight();
+			}
+			max = node;
+		}
+	}
+
+	/**
+	 * Update the size of this node and its descendents after a change in size happened to a child
+	 *
+	 * @param node AVL node
+	 */
+	private void updateSizeToRoot(IAVLNode node) {
+		if (node != null) {
+			node.setSize(node.getLeft().getSize() + node.getRight().getSize() + 1);
+			updateSizeToRoot(node.getParent());
+		}
 	}
 
 	//endregion
@@ -202,16 +269,18 @@ public class AVLTree {
 	 * otherwise, returns null
 	 */
 	public String search(int k) {
-		IAVLNode node=this.root;
-		while(node.isRealNode())
-			if(node.getKey()==k)
+		IAVLNode node = root;
+		while (node != null && node.isRealNode()) {
+			if (node.getKey() == k) {
 				return node.getValue();
-			else if(node.getKey()>k)
-				node=node.getLeft();
-			else
-				node=node.getRight();
+			} else if (node.getKey() > k) {
+				node = node.getLeft();
+			} else {
+				node = node.getRight();
+			}
+		}
 
-			return null;
+		return null;
 	}
 
 	/**
@@ -225,14 +294,7 @@ public class AVLTree {
 	public int insert(int k, String i) {
 		IAVLNode node = new AVLNode(k, i);
 
-		final int number_of_rebalances = insertNode(node);
-		updatePointersOfMaxNMin();
-		return number_of_rebalances;
-	}
-
-	protected void updatePointersOfMaxNMin() {
-		updateMax();
-		updateMin();
+		return insertNode(node);
 	}
 
 	/**
@@ -244,7 +306,7 @@ public class AVLTree {
 	 * returns -1 if an item with key k was not found in the tree.
 	 */
 	public int delete(int k) {
-		final Optional<IAVLNode> placeToDelete = findPlace(k);
+		final Optional<IAVLNode> placeToDelete = findNodeByKey(k);
 		//return -1 if the key was not found
 		if (!placeToDelete.isPresent())
 			return -1;
@@ -261,9 +323,14 @@ public class AVLTree {
 		} else {
 			deletedNodeParent = deleteSuccessor(deletedNode);
 		}
-		treeSize--;
+		updateSizeToRoot(deletedNodeParent);
 		int amount = deletionBalancer.rebalance(deletedNodeParent);
-		updatePointersOfMaxNMin();
+		if (deletedNode == min) {
+			updateMin();
+		}
+		if (deletedNode == max) {
+			updateMax();
+		}
 		return amount;
 	}
 
@@ -274,18 +341,7 @@ public class AVLTree {
 	 * or null if the tree is empty
 	 */
 	public String min() {
-
-
-		return this.min_pointer.getValue();
-	}
-
-	protected void updateMin() {
-		IAVLNode node = this.root;
-		if (empty())
-			min_pointer= null;
-		while (node.getLeft().isRealNode())
-			node = node.getLeft();
-		min_pointer=node;
+		return min != null ? this.min.getValue() : null;
 	}
 
 	/**
@@ -295,16 +351,7 @@ public class AVLTree {
 	 * or null if the tree is empty
 	 */
 	public String max() {
-		return this.max_pointer.getValue();
-	}
-
-	protected void updateMax() {
-		IAVLNode node = this.root;
-		if (empty())
-			max_pointer=null;
-		while (node.getRight().isRealNode())
-			node = node.getRight();
-		this.max_pointer = node;
+		return max != null ? this.max.getValue() : null;
 	}
 
 	/**
@@ -341,7 +388,7 @@ public class AVLTree {
 	 * postcondition: none
 	 */
 	public int size() {
-		return treeSize;
+		return empty() ? 0 : root.getSize();
 	}
 
 	/**
@@ -352,6 +399,7 @@ public class AVLTree {
 	 * precondition: none
 	 * postcondition: none
 	 */
+
 	public IAVLNode getRoot() {
 		return root;
 	}
@@ -365,9 +413,55 @@ public class AVLTree {
 	 * postcondition: none
 	 */
 	public AVLTree[] split(int x) {
-		return null;
+		AVLTree greaterTree = new AVLTree();
+		AVLTree smallerTree = new AVLTree();
+
+		IAVLNode node = findNodeByKey(x).get();
+		greaterTree.root = node.getRight().isRealNode() ? node.getRight() : null;
+		node.getRight().setParent(null);
+
+		smallerTree.root = node.getLeft().isRealNode() ? node.getLeft() : null;
+		node.getLeft().setParent(null);
+
+		node = node.getParent();
+		// travel until we get to the root, while joining the left or right subtrees to the split trees
+		while (node != null) {
+			IAVLNode parent = node.getParent();
+			//disconnect node from tree
+			node.setParent(null);
+			node.setHeight(0);
+			node.setSize(1);
+
+			AVLTree tree = new AVLTree();
+			if (x > node.getKey()) {
+				tree.root = node.getLeft().isRealNode() ? node.getLeft() : null;
+				node.getLeft().setParent(null);
+				node.setFakeLeft();
+				node.setFakeRight();
+				smallerTree.join(node, tree);
+			} else {
+				tree.root = node.getRight().isRealNode() ? node.getRight() : null;
+				node.getRight().setParent(null);
+				node.setFakeLeft();
+				node.setFakeRight();
+				greaterTree.join(node, tree);
+			}
+			node = parent;
+		}
+
+		//set min and max
+		if (x != min.getKey()) {
+			smallerTree.min = min;
+		}
+		if (x != max.getKey()) {
+			greaterTree.max = max;
+		}
+		smallerTree.updateMax();
+		greaterTree.updateMin();
+
+		return new AVLTree[]{smallerTree, greaterTree};
 	}
-//@todo add updatePointersOfMaxNMin to split
+
 	/**
 	 * public join(IAVLNode x, AVLTree t)
 	 * <p>
@@ -378,10 +472,12 @@ public class AVLTree {
 	 */
 	public int join(IAVLNode x, AVLTree t) {
 		int complexity = Math.abs(getHeight() - t.getHeight()) + 1;
-		int newSize = size() + t.size() + 1;
 		if (empty() || t.empty()) {
 			if (empty()) {
 				root = t.getRoot();
+				//update min and max
+				min = t.min;
+				max = t.max;
 			}
 			insertNode(x);
 		} else {
@@ -398,6 +494,9 @@ public class AVLTree {
 				if (joinNode.getParent() != null) {
 					joinNode.getParent().setLeft(x);
 				}
+				//update min and max
+				min = smallerTree.min;
+				max = largerTree.max;
 			} else {
 				//the key of x is bigger than the large tree's keys
 				joinNode = largerTree.findSubtreeByHeight(false, smallerTree.getHeight());
@@ -406,8 +505,12 @@ public class AVLTree {
 				if (joinNode.getParent() != null) {
 					joinNode.getParent().setRight(x);
 				}
+				//update min and max
+				min = largerTree.min;
+				max = smallerTree.max;
 			}
 			x.setParent(joinNode.getParent());
+			updateSizeToRoot(x);
 			joinNode.setParent(x);
 			smallerTree.root.setParent(x);
 			x.setHeight(smallerTree.getHeight() + 1);
@@ -420,11 +523,14 @@ public class AVLTree {
 			}
 			insertionBalancer.rebalance(x);
 		}
-		treeSize = newSize;
-		updatePointersOfMaxNMin();
 		return complexity;
 	}
 
+	/**
+	 * Get the height of the tree
+	 *
+	 * @return height
+	 */
 	public int getHeight() {
 		if (getRoot() != null) {
 			return getRoot().getHeight();
@@ -465,6 +571,20 @@ public class AVLTree {
 		public int getHeight(); // Returns the height of the node (-1 for virtual nodes)
 
 		/**
+		 * Get the number of nodes in this node's subtree
+		 *
+		 * @return size
+		 */
+		int getSize();
+
+		/**
+		 * Set the number of nodes in this node's subtree
+		 *
+		 * @param size amount of nodes in subtree
+		 */
+		void setSize(int size);
+
+		/**
 		 * Increases height by 1
 		 *
 		 * @return the time complexity of the action
@@ -501,6 +621,7 @@ public class AVLTree {
 		private IAVLNode parent;
 		private boolean realNode;
 		private int height;
+		private int size = 1;
 
 		public AVLNode(int key, String value) {
 			this(key, value, null, true);
@@ -513,6 +634,7 @@ public class AVLTree {
 			this.realNode = realNode;
 			if (!realNode) {
 				height = -1;
+				size = 0;
 				this.key = -1;
 			}
 		}
@@ -574,6 +696,14 @@ public class AVLTree {
 			return height;
 		}
 
+		public int getSize() {
+			return size;
+		}
+
+		public void setSize(int size) {
+			this.size = size;
+		}
+
 		public int promote() {
 			setHeight(getHeight() + 1);
 			return 1;
@@ -612,7 +742,8 @@ public class AVLTree {
 
 			//update parents
 			updateParents(parent, node, leftChild);
-
+			//updates sizes
+			updateSizes(parent, node);
 			return 1;
 		}
 
@@ -641,7 +772,8 @@ public class AVLTree {
 
 			//update parents
 			updateParents(parent, node, rightChild);
-
+			//updates sizes
+			updateSizes(parent, node);
 			return 1;
 		}
 
@@ -683,6 +815,17 @@ public class AVLTree {
 			parent.setParent(node);
 			if (nodesChild != null)
 				nodesChild.setParent(parent);
+		}
+
+		/**
+		 * Update the sizes of nodes involved in a rotation
+		 *
+		 * @param parent the parent of the rotated node
+		 * @param node   the rotated node
+		 */
+		private void updateSizes(IAVLNode parent, IAVLNode node) {
+			node.setSize(parent.getSize());
+			parent.setSize(parent.getLeft().getSize() + parent.getRight().getSize() + 1);
 		}
 	}
 

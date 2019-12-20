@@ -146,6 +146,7 @@ public class JoinTest {
 			HashSet<Integer> selectedValues = new HashSet<>();
 			AVLTree[] trees = new AVLTree[2];
 			int[] size = new int[2];
+			int min = xKey, max = xKey;
 			for (int j = 0; j < 2; j++) {
 				size[j] = rand.nextInt(maxTreeSize);
 				int rangeStart, rangeEnd;
@@ -165,6 +166,8 @@ public class JoinTest {
 					} while (selectedValues.contains(randKey));
 					selectedValues.add(randKey);
 					trees[j].insert(randKey, "a");
+					min = Math.min(min, randKey);
+					max = Math.max(max, randKey);
 				}
 				below = !below;
 			}
@@ -172,6 +175,8 @@ public class JoinTest {
 			trees[0].join(x, trees[1]);
 
 			assertEquals(size[0] + size[1] + 1, trees[0].size());
+			assertEquals(min, trees[0].min.getKey());
+			assertEquals(max, trees[0].max.getKey());
 			TestUtils.testAVL(trees[0]);
 		}
 	}

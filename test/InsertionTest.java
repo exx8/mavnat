@@ -85,8 +85,14 @@ class InsertionTest {
 	void manyInsertionsTest() {
 		AVLTree tree = new AVLTree();
 		Random rand = new Random();
+		int min = 10000, max = -1;
 		for (int i = 0; i < 1000; i++) {
-			tree.insert(rand.nextInt(5000), "a");
+			int key = rand.nextInt(5000);
+			tree.insert(key, "a");
+			min = Math.min(min, key);
+			max = Math.max(max, key);
+			assertEquals(min, tree.min.getKey());
+			assertEquals(max, tree.max.getKey());
 			TestUtils.testAVL(tree);
 		}
 	}
