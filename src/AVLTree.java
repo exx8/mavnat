@@ -15,8 +15,8 @@ public class AVLTree {
 	private Rotations rotations = new Rotations();
 	private InsertionBalancer insertionBalancer = new InsertionBalancer();
 	private DeletionBalancer deletionBalancer = new DeletionBalancer();
-	private IAVLNode max_pointer = null;
-	private IAVLNode min_pointer = null;
+	protected IAVLNode min;
+	protected IAVLNode max;
 
 	//region private methods
 
@@ -44,7 +44,7 @@ public class AVLTree {
 	}
 
 	/**
-	 * Inserts a node to the AVL tree.
+	 * Inserts a node to the AVL tree
 	 *
 	 * @param node the node to insert
 	 * @return the number of rebalancing operations, or 0 if no rebalancing operations were necessary.
@@ -77,6 +77,14 @@ public class AVLTree {
 			rebalances = insertionBalancer.rebalance(node);
 		}
 		treeSize++;
+		//update min and max
+		if (min == null || node.getKey() < min.getKey()) {
+			min = node;
+		}
+		if (max == null || node.getKey() > max.getKey()) {
+			max = node;
+		}
+
 		return rebalances;
 	}
 
@@ -165,11 +173,24 @@ public class AVLTree {
 		replacementNode.setParent(parent);
 	}
 
-	protected Optional<IAVLNode> findPlace(int key) {
-		return findPlace(key, this.root);
+	/**
+	 * Find a node in the tree by its key
+	 *
+	 * @param key the key of the searched node
+	 * @return AVL node
+	 */
+	protected Optional<IAVLNode> findNodeByKey(int key) {
+		return findNodeByKey(key, this.root);
 	}
 
-	protected static Optional<IAVLNode> findPlace(int key, IAVLNode currentNode) {
+	/**
+	 * Find a node in a subtree by its key
+	 *
+	 * @param key         the key of the searched node
+	 * @param currentNode the parent of the subtree to search
+	 * @return AVL node
+	 */
+	protected Optional<IAVLNode> findNodeByKey(int key, IAVLNode currentNode) {
 		if (currentNode == null)
 			return Optional.empty();
 		if (!currentNode.isRealNode())
@@ -178,10 +199,39 @@ public class AVLTree {
 		if (currentNodeKey == key)
 			return Optional.of(currentNode);
 		else if (currentNodeKey > key)
-			return findPlace(key, currentNode.getLeft());
+			return findNodeByKey(key, currentNode.getLeft());
 		else
-			return findPlace(key, currentNode.getRight());
+			return findNodeByKey(key, currentNode.getRight());
+	}
 
+	/**
+	 * Update the minimum field
+	 */
+	protected void updateMin() {
+		if (empty()) {
+			min = null;
+		} else {
+			IAVLNode node = root;
+			while (node.getLeft().isRealNode()) {
+				node = node.getLeft();
+			}
+			min = node;
+		}
+	}
+
+	/**
+	 * Update the maximum field
+	 */
+	protected void updateMax() {
+		if (empty()) {
+			max = null;
+		} else {
+			IAVLNode node = root;
+			while (node.getRight().isRealNode()) {
+				node = node.getRight();
+			}
+			max = node;
+		}
 	}
 
 	//endregion
@@ -225,14 +275,7 @@ public class AVLTree {
 	public int insert(int k, String i) {
 		IAVLNode node = new AVLNode(k, i);
 
-		final int number_of_rebalances = insertNode(node);
-		updatePointersOfMaxNMin();
-		return number_of_rebalances;
-	}
-
-	protected void updatePointersOfMaxNMin() {
-		updateMax();
-		updateMin();
+		return insertNode(node);
 	}
 
 	/**
@@ -244,7 +287,7 @@ public class AVLTree {
 	 * returns -1 if an item with key k was not found in the tree.
 	 */
 	public int delete(int k) {
-		final Optional<IAVLNode> placeToDelete = findPlace(k);
+		final Optional<IAVLNode> placeToDelete = findNodeByKey(k);
 		//return -1 if the key was not found
 		if (!placeToDelete.isPresent())
 			return -1;
@@ -263,7 +306,12 @@ public class AVLTree {
 		}
 		treeSize--;
 		int amount = deletionBalancer.rebalance(deletedNodeParent);
-		updatePointersOfMaxNMin();
+		if (deletedNode == min) {
+			updateMin();
+		}
+		if (deletedNode == max) {
+			updateMax();
+		}
 		return amount;
 	}
 
@@ -274,18 +322,7 @@ public class AVLTree {
 	 * or null if the tree is empty
 	 */
 	public String min() {
-
-
-		return this.min_pointer.getValue();
-	}
-
-	protected void updateMin() {
-		IAVLNode node = this.root;
-		if (empty())
-			min_pointer = null;
-		while (node.getLeft().isRealNode())
-			node = node.getLeft();
-		min_pointer = node;
+		return min != null ? this.min.getValue() : null;
 	}
 
 	/**
@@ -295,16 +332,7 @@ public class AVLTree {
 	 * or null if the tree is empty
 	 */
 	public String max() {
-		return this.max_pointer.getValue();
-	}
-
-	protected void updateMax() {
-		IAVLNode node = this.root;
-		if (empty())
-			max_pointer = null;
-		while (node.getRight().isRealNode())
-			node = node.getRight();
-		this.max_pointer = node;
+		return max != null ? this.max.getValue() : null;
 	}
 
 	/**
@@ -369,7 +397,7 @@ public class AVLTree {
 		AVLTree greaterTree = new AVLTree();
 		AVLTree smallerTree = new AVLTree();
 
-		IAVLNode node = findPlace(x).get();
+		IAVLNode node = findNodeByKey(x).get();
 		greaterTree.root = node.getRight().isRealNode() ? node.getRight() : null;
 		node.getRight().setParent(null);
 
@@ -379,19 +407,20 @@ public class AVLTree {
 		node = node.getParent();
 		// travel until we get to the root, while joining the left or right subtrees to the split trees
 		while (node != null) {
+			//disconnect node from tree
+			node.setParent(null);
+			node.setHeight(0);
+			node.getLeft().setParent(null);
+			node.getRight().setParent(null);
+			node.setFakeLeft();
+			node.setFakeRight();
+
+			AVLTree tree = new AVLTree();
 			if (x > node.getKey()) {
-				node.setFakeRight();
-				node.setParent(null);
-				node.getLeft().setParent(null);
-				AVLTree tree = new AVLTree();
-				tree.root = node.getLeft();
+				tree.root = node.getLeft().isRealNode() ? node.getLeft() : null;
 				smallerTree.join(node, tree);
 			} else {
-				node.setFakeLeft();
-				node.setParent(null);
-				node.getRight().setParent(null);
-				AVLTree tree = new AVLTree();
-				tree.root = node.getRight();
+				tree.root = node.getRight().isRealNode() ? node.getRight() : null;
 				greaterTree.join(node, tree);
 			}
 			node = node.getParent();
@@ -414,6 +443,9 @@ public class AVLTree {
 		if (empty() || t.empty()) {
 			if (empty()) {
 				root = t.getRoot();
+				//update min and max
+				min = t.min;
+				max = t.max;
 			}
 			insertNode(x);
 		} else {
@@ -430,6 +462,9 @@ public class AVLTree {
 				if (joinNode.getParent() != null) {
 					joinNode.getParent().setLeft(x);
 				}
+				//update min and max
+				min = smallerTree.min;
+				max = largerTree.max;
 			} else {
 				//the key of x is bigger than the large tree's keys
 				joinNode = largerTree.findSubtreeByHeight(false, smallerTree.getHeight());
@@ -438,6 +473,9 @@ public class AVLTree {
 				if (joinNode.getParent() != null) {
 					joinNode.getParent().setRight(x);
 				}
+				//update min and max
+				min = largerTree.min;
+				max = smallerTree.max;
 			}
 			x.setParent(joinNode.getParent());
 			joinNode.setParent(x);
@@ -453,10 +491,14 @@ public class AVLTree {
 			insertionBalancer.rebalance(x);
 		}
 		treeSize = newSize;
-		updatePointersOfMaxNMin();
 		return complexity;
 	}
 
+	/**
+	 * Get the height of the tree
+	 *
+	 * @return height
+	 */
 	public int getHeight() {
 		if (getRoot() != null) {
 			return getRoot().getHeight();
