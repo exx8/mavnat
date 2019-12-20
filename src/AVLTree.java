@@ -87,15 +87,20 @@ public class AVLTree {
 		return rebalances;
 	}
 
-	private int inorderScan(IAVLNode node, IAVLNode[] arr, int index) {
+	/**
+	 * Recursively fill an array with an in-order scan of the tree's nodes
+	 *
+	 * @param node  the current node (should be the root for the first call)
+	 * @param arr   the array to fill with in-order nodes (should be empty for the first call)
+	 * @param index the current index in the array (should be 0 for the first call)
+	 */
+	private void inorderScan(IAVLNode node, IAVLNode[] arr, int index) {
 		if (node != null && node.isRealNode()) {
-			int amount = inorderScan(node.getLeft(), arr, index);
-			index += amount;
+			inorderScan(node.getLeft(), arr, index);
+			index += node.getLeft().getSize();
 			arr[index] = node;
-			amount += 1 + inorderScan(node.getRight(), arr, index + 1);
-			return amount;
+			inorderScan(node.getRight(), arr, index + 1);
 		}
-		return 0;
 	}
 
 	/**
