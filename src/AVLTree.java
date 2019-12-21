@@ -251,6 +251,15 @@ public class AVLTree {
 		}
 	}
 
+	/**
+	 * Creates a new empty AVL tree
+	 *
+	 * @return AVL tree
+	 */
+	protected AVLTree createTree() {
+		return new AVLTree();
+	}
+
 	//endregion
 
 	/**
@@ -413,8 +422,8 @@ public class AVLTree {
 	 * postcondition: none
 	 */
 	public AVLTree[] split(int x) {
-		AVLTree greaterTree = new AVLTree();
-		AVLTree smallerTree = new AVLTree();
+		AVLTree greaterTree = createTree();
+		AVLTree smallerTree = createTree();
 
 		IAVLNode node = findNodeByKey(x).get();
 		greaterTree.root = node.getRight().isRealNode() ? node.getRight() : null;
@@ -432,7 +441,7 @@ public class AVLTree {
 			node.setHeight(0);
 			node.setSize(1);
 
-			AVLTree tree = new AVLTree();
+			AVLTree tree = createTree();
 			if (x > node.getKey()) {
 				tree.root = node.getLeft().isRealNode() ? node.getLeft() : null;
 				node.getLeft().setParent(null);
