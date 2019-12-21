@@ -24,6 +24,7 @@ public class AVLTree {
 	 * <p>
 	 * precondition: a node with height smaller or equal to maxHeight exists
 	 * </p>
+	 *complexity: O(log n)
 	 *
 	 * @param left      the side of the tree to go down to
 	 * @param maxHeight the maximum height of the subtree
@@ -44,6 +45,7 @@ public class AVLTree {
 
 	/**
 	 * Inserts a node to the AVL tree
+	 *O(log n)
 	 *
 	 * @param node the node to insert
 	 * @return the number of rebalancing operations, or 0 if no rebalancing operations were necessary.
@@ -89,6 +91,7 @@ public class AVLTree {
 
 	/**
 	 * Recursively fill an array with an in-order scan of the tree's nodes
+	 * complexity: O(n)
 	 *
 	 * @param node  the current node (should be the root for the first call)
 	 * @param arr   the array to fill with in-order nodes (should be empty for the first call)
@@ -105,6 +108,7 @@ public class AVLTree {
 
 	/**
 	 * Find the successor of a node with a right child
+	 *complexity: O(log n)
 	 *
 	 * @param node AVL node
 	 * @return the successor
@@ -119,6 +123,7 @@ public class AVLTree {
 
 	/**
 	 * Delete a node by replacing it with its successor and deleting the successor instead
+	 *complexity: O(log n)
 	 *
 	 * @param node
 	 * @return the parent of the successor
@@ -158,6 +163,7 @@ public class AVLTree {
 
 	/**
 	 * Delete a node with one or zero children
+	 *complexity: O(1)
 	 *
 	 * @param node
 	 */
@@ -180,6 +186,7 @@ public class AVLTree {
 
 	/**
 	 * Find a node in the tree by its key
+	 *complexity: O(log n)
 	 *
 	 * @param key the key of the searched node
 	 * @return AVL node
@@ -190,6 +197,7 @@ public class AVLTree {
 
 	/**
 	 * Find a node in a subtree by its key
+	 *complexity: O(log n)
 	 *
 	 * @param key         the key of the searched node
 	 * @param currentNode the parent of the subtree to search
@@ -211,6 +219,7 @@ public class AVLTree {
 
 	/**
 	 * Update the minimum field
+	 *complexity: O(log n)
 	 */
 	protected void updateMin() {
 		if (empty()) {
@@ -226,6 +235,7 @@ public class AVLTree {
 
 	/**
 	 * Update the maximum field
+ 	 *complexity: O(log n)
 	 */
 	protected void updateMax() {
 		if (empty()) {
@@ -241,6 +251,7 @@ public class AVLTree {
 
 	/**
 	 * Update the size of this node and its descendents after a change in size happened to a child
+	 *complexity: O(log n)
 	 *
 	 * @param node AVL node
 	 */
@@ -256,6 +267,8 @@ public class AVLTree {
 	/**
 	 * public boolean empty()
 	 * <p>
+	 *complexity: O(1)
+	 *
 	 * returns true if and only if the tree is empty
 	 */
 	public boolean empty() {
@@ -265,6 +278,8 @@ public class AVLTree {
 	/**
 	 * public String search(int k)
 	 * <p>
+	 *complexity: O(log n)
+	 *
 	 * returns the info of an item with key k if it exists in the tree
 	 * otherwise, returns null
 	 */
@@ -286,6 +301,8 @@ public class AVLTree {
 	/**
 	 * public int insert(int k, String i)
 	 * <p>
+	 *complexity: O(log n)
+	 *
 	 * inserts an item with key k and info i to the AVL tree.
 	 * the tree must remain valid (keep its invariants).
 	 * returns the number of rebalancing operations, or 0 if no rebalancing operations were necessary.
@@ -300,6 +317,8 @@ public class AVLTree {
 	/**
 	 * public int delete(int k)
 	 * <p>
+	 *complexity: O(log n)
+	 *
 	 * deletes an item with key k from the binary tree, if it is there;
 	 * the tree must remain valid (keep its invariants).
 	 * returns the number of rebalancing operations, or 0 if no rebalancing operations were needed.
@@ -339,6 +358,7 @@ public class AVLTree {
 	 * <p>
 	 * Returns the info of the item with the smallest key in the tree,
 	 * or null if the tree is empty
+	 **complexity: O(1)
 	 */
 	public String min() {
 		return min != null ? this.min.getValue() : null;
@@ -346,6 +366,8 @@ public class AVLTree {
 
 	/**
 	 * public String max()
+	 *complexity: O(1)
+	 *
 	 * <p>
 	 * Returns the info of the item with the largest key in the tree,
 	 * or null if the tree is empty
