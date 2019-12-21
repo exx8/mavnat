@@ -218,7 +218,6 @@ class AVLTreeTestExternal {
 		AVLTree tree = arrayToTree(values);
 		int realSize = (int)Arrays.stream(values).distinct().count();
 
-		System.out.println(realSize + " vs " + tree.size());
 		assertEquals(tree.size(), realSize);
 	}
 

@@ -24,7 +24,7 @@ public class AVLTree {
 	 * <p>
 	 * precondition: a node with height smaller or equal to maxHeight exists
 	 * </p>
-	 *complexity: O(log n)
+	 * complexity: O(log n-maxHeight)
 	 *
 	 * @param left      the side of the tree to go down to
 	 * @param maxHeight the maximum height of the subtree
@@ -631,11 +631,6 @@ public class AVLTree {
 	 * (It must implement IAVLNode)
 	 */
 	public class AVLNode implements IAVLNode {
-		@Override
-		public String toString() {
-			return key + " " + value;
-		}
-
 		private int key;
 		private String value;
 		private IAVLNode left;
