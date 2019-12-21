@@ -45,7 +45,7 @@ public class AVLTree {
 
 	/**
 	 * Inserts a node to the AVL tree
-	 *O(log n)
+	 * O(log n)
 	 *
 	 * @param node the node to insert
 	 * @return the number of rebalancing operations, or 0 if no rebalancing operations were necessary.
@@ -108,7 +108,7 @@ public class AVLTree {
 
 	/**
 	 * Find the successor of a node with a right child
-	 *complexity: O(log n)
+	 * complexity: O(log n)
 	 *
 	 * @param node AVL node
 	 * @return the successor
@@ -123,7 +123,7 @@ public class AVLTree {
 
 	/**
 	 * Delete a node by replacing it with its successor and deleting the successor instead
-	 *complexity: O(log n)
+	 * complexity: O(log n)
 	 *
 	 * @param node
 	 * @return the parent of the successor
@@ -163,7 +163,7 @@ public class AVLTree {
 
 	/**
 	 * Delete a node with one or zero children
-	 *complexity: O(1)
+	 * complexity: O(1)
 	 *
 	 * @param node
 	 */
@@ -186,7 +186,7 @@ public class AVLTree {
 
 	/**
 	 * Find a node in the tree by its key
-	 *complexity: O(log n)
+	 * complexity: O(log n)
 	 *
 	 * @param key the key of the searched node
 	 * @return AVL node
@@ -197,7 +197,7 @@ public class AVLTree {
 
 	/**
 	 * Find a node in a subtree by its key
-	 *complexity: O(log n)
+	 * complexity: O(log n)
 	 *
 	 * @param key         the key of the searched node
 	 * @param currentNode the parent of the subtree to search
@@ -219,7 +219,7 @@ public class AVLTree {
 
 	/**
 	 * Update the minimum field
-	 *complexity: O(log n)
+	 * complexity: O(log n)
 	 */
 	protected void updateMin() {
 		if (empty()) {
@@ -235,7 +235,7 @@ public class AVLTree {
 
 	/**
 	 * Update the maximum field
- 	 *complexity: O(log n)
+	 * complexity: O(log n)
 	 */
 	protected void updateMax() {
 		if (empty()) {
@@ -251,7 +251,7 @@ public class AVLTree {
 
 	/**
 	 * Update the size of this node and its descendents after a change in size happened to a child
-	 *complexity: O(log n)
+	 * complexity: O(log n)
 	 *
 	 * @param node AVL node
 	 */
@@ -267,8 +267,8 @@ public class AVLTree {
 	/**
 	 * public boolean empty()
 	 * <p>
-	 *complexity: O(1)
-	 *
+	 * complexity: O(1)
+	 * <p>
 	 * returns true if and only if the tree is empty
 	 */
 	public boolean empty() {
@@ -278,8 +278,8 @@ public class AVLTree {
 	/**
 	 * public String search(int k)
 	 * <p>
-	 *complexity: O(log n)
-	 *
+	 * complexity: O(log n)
+	 * <p>
 	 * returns the info of an item with key k if it exists in the tree
 	 * otherwise, returns null
 	 */
@@ -301,8 +301,8 @@ public class AVLTree {
 	/**
 	 * public int insert(int k, String i)
 	 * <p>
-	 *complexity: O(log n)
-	 *
+	 * complexity: O(log n)
+	 * <p>
 	 * inserts an item with key k and info i to the AVL tree.
 	 * the tree must remain valid (keep its invariants).
 	 * returns the number of rebalancing operations, or 0 if no rebalancing operations were necessary.
@@ -317,8 +317,8 @@ public class AVLTree {
 	/**
 	 * public int delete(int k)
 	 * <p>
-	 *complexity: O(log n)
-	 *
+	 * complexity: O(log n)
+	 * <p>
 	 * deletes an item with key k from the binary tree, if it is there;
 	 * the tree must remain valid (keep its invariants).
 	 * returns the number of rebalancing operations, or 0 if no rebalancing operations were needed.
@@ -358,7 +358,7 @@ public class AVLTree {
 	 * <p>
 	 * Returns the info of the item with the smallest key in the tree,
 	 * or null if the tree is empty
-	 **complexity: O(1)
+	 * *complexity: O(1)
 	 */
 	public String min() {
 		return min != null ? this.min.getValue() : null;
@@ -366,7 +366,7 @@ public class AVLTree {
 
 	/**
 	 * public String max()
-	 *complexity: O(1)
+	 * complexity: O(1)
 	 *
 	 * <p>
 	 * Returns the info of the item with the largest key in the tree,
@@ -379,7 +379,7 @@ public class AVLTree {
 	/**
 	 * public int[] keysToArray()
 	 * <p>
-	 **complexity: O(n)
+	 * complexity: O(n)
 	 * Returns a sorted array which contains all keys in the tree,
 	 * or an empty array if the tree is empty.
 	 */
@@ -392,7 +392,7 @@ public class AVLTree {
 	/**
 	 * public String[] infoToArray()
 	 * <p>
-	 *complexity: O(n)
+	 * complexity: O(n)
 	 * Returns an array which contains all info in the tree,
 	 * sorted by their respective keys,
 	 * or an empty array if the tree is empty.
@@ -406,7 +406,7 @@ public class AVLTree {
 	/**
 	 * public int size()
 	 * <p>
-	 **complexity: O(1)
+	 * *complexity: O(1)
 	 * Returns the number of nodes in the tree.
 	 * <p>
 	 * precondition: none
@@ -419,7 +419,7 @@ public class AVLTree {
 	/**
 	 * public int getRoot()
 	 * <p>
-	 *complexity: O(1)
+	 * complexity: O(1)
 	 * Returns the root AVL node, or null if the tree is empty
 	 * <p>
 	 * precondition: none
@@ -433,7 +433,7 @@ public class AVLTree {
 	/**
 	 * public string split(int x)
 	 * <p>
-	 *complexity: O(log n)
+	 * complexity: O(log n)
 	 * splits the tree into 2 trees according to the key x.
 	 * Returns an array [t1, t2] with two AVL trees. keys(t1) < x < keys(t2).
 	 * precondition: search(x) != null
@@ -493,7 +493,7 @@ public class AVLTree {
 	 * public join(IAVLNode x, AVLTree t)
 	 * <p>
 	 * joins t and x with the tree.
-	 *complexity:O(delta-h) or O(n) (whereas delta-h is the height difference between the 2 trees)
+	 * complexity:O(delta-h) - rank difference between the tree and t
 	 * Returns the complexity of the operation (rank difference between the tree and t)
 	 * precondition: keys(x,t) < keys() or keys(x,t) > keys()
 	 * postcondition: none
@@ -556,7 +556,8 @@ public class AVLTree {
 
 	/**
 	 * Get the height of the tree
-	 *complexity: O(1)
+	 * complexity: O(1)
+	 *
 	 * @return height
 	 */
 	public int getHeight() {
@@ -742,7 +743,8 @@ public class AVLTree {
 
 		/**
 		 * Perform a left rotation
-		 *complexity: O(1)
+		 * complexity: O(1)
+		 *
 		 * @param node the node to rotate
 		 * @return time complexity
 		 */
@@ -772,7 +774,7 @@ public class AVLTree {
 
 		/**
 		 * Perform a right rotation
-		 *complexity: O(1)
+		 * complexity: O(1)
 		 *
 		 * @param node the node to rotate
 		 * @return time complexity
@@ -803,7 +805,7 @@ public class AVLTree {
 
 		/**
 		 * Perform a double rotation of left and right
-		 *complexity: O(1)
+		 * complexity: O(1)
 		 *
 		 * @param node the node to double rotate
 		 * @return time complexity
@@ -817,7 +819,7 @@ public class AVLTree {
 
 		/**
 		 * Perform a double rotation of right and left
-		 *complexity: O(1)
+		 * complexity: O(1)
 		 *
 		 * @param node the node to double rotate
 		 * @return time complexity
@@ -831,7 +833,7 @@ public class AVLTree {
 
 		/**
 		 * Update the parent field of nodes involved in a rotation
-		 *complexity: O(1)
+		 * complexity: O(1)
 		 *
 		 * @param parent     the parent of the rotated node
 		 * @param node       the rotated node
@@ -846,7 +848,8 @@ public class AVLTree {
 
 		/**
 		 * Update the sizes of nodes involved in a rotation
-		 *complexity: O(1)
+		 * complexity: O(1)
+		 *
 		 * @param parent the parent of the rotated node
 		 * @param node   the rotated node
 		 */
@@ -859,7 +862,8 @@ public class AVLTree {
 	class InsertionBalancer {
 		/**
 		 * Rebalances a node after insertion to the tree.
-		 *complexity: O(log n)
+		 * complexity: O(log n)
+		 *
 		 * @param node the node to rebalance
 		 * @return the number of rebalances that occurred
 		 */
@@ -899,7 +903,8 @@ public class AVLTree {
 
 		/**
 		 * Handle case 1 of insertion, which requires promotion and additional rebalancing
-		 *complexity: O(log n)
+		 * complexity: O(log n)
+		 *
 		 * @param parent the rebalanced node's parent
 		 * @return time complexity of the operation
 		 */
@@ -912,7 +917,8 @@ public class AVLTree {
 
 		/**
 		 * Handle case 2 of insertion, which requires rotation
-		 *complexity: O(log n)
+		 * complexity: O(1)
+		 *
 		 * @param parent   the rebalanced node's parent
 		 * @param node     the rebalanced node
 		 * @param leftDif  the height difference between the rebalanced node and its left child
@@ -941,7 +947,8 @@ public class AVLTree {
 
 		/**
 		 * Handle case 3 of insertion, which requires double rotation
-		 *complexity: O(1)
+		 * complexity: O(1)
+		 *
 		 * @param parent   the rebalanced node's parent
 		 * @param node     the rebalanced node
 		 * @param leftDif  the height difference between the rebalanced node and its left child
@@ -972,7 +979,8 @@ public class AVLTree {
 	class DeletionBalancer {
 		/**
 		 * Rebalances a node after deletion from the tree.
-		 *complexity: O(log n)
+		 * complexity: O(log n)
+		 *
 		 * @param node the parent of the deleted node
 		 * @return the number of rebalances that occurred
 		 */
@@ -1025,7 +1033,8 @@ public class AVLTree {
 
 		/**
 		 * Handle case 1 of deletion, which requires demotion and more rebalancing
-		 *complexity: O(log n)
+		 * complexity: O(log n)
+		 *
 		 * @param node the rebalanced node
 		 * @return time complexity
 		 */
@@ -1038,7 +1047,8 @@ public class AVLTree {
 
 		/**
 		 * Handle case 2 of deletion, which requires rotation
-		 *complexity: O(1)
+		 * complexity: O(1)
+		 *
 		 * @param leftDifLarger       is the left height difference larger (decides the symmetric case side)
 		 * @param node                the rebalanced node
 		 * @param grandchildrenParent the node's child with grandchildren to rebalance
@@ -1058,7 +1068,7 @@ public class AVLTree {
 
 		/**
 		 * Handle case 3 of deletion, which requires rotation and more rebalancing
-		 *complexity: O(log n)
+		 * complexity: O(log n)
 		 *
 		 * @param leftDifLarger       is the left height difference larger (decides the symmetric case side)
 		 * @param node                the rebalanced node
@@ -1080,7 +1090,7 @@ public class AVLTree {
 
 		/**
 		 * Handle case 4 of deletion, which requires double rotation and more rebalancing
-		 *complexity: O(log n)
+		 * complexity: O(log n)
 		 *
 		 * @param leftDifLarger       is the left height difference larger (decides the symmetric case side)
 		 * @param node                the rebalanced node
